@@ -33,6 +33,11 @@ export interface Restaurant {
   updated_at: string | null;
 }
 
+export interface MenuItemImage {
+    id: number;
+    image_url: string;
+}
+
 export interface MenuItem {
   id: number;
   restaurant_id: number;
@@ -40,7 +45,7 @@ export interface MenuItem {
   description: string;
   price: string;
   is_available: boolean;
-  images?: string[]; // تم التصحيح هنا
+  images?: MenuItemImage[];
   removable_ingredients?: string[];
 }
 
