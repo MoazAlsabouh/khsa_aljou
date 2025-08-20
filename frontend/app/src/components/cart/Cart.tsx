@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCartStore } from '../../store/cartStore';
 import Button from '../common/Button';
 import toast from 'react-hot-toast';
 import axiosClient from '../../api/axiosClient';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useAddressStore } from '../../store/addressStore';
 
 const Cart = () => {
@@ -46,7 +46,7 @@ const Cart = () => {
     };
 
     try {
-      const response = await axiosClient.post('/orders/', orderData);
+      const response = await axiosClient.post('/orders', orderData);
       toast.dismiss(loadingToast);
       toast.success('تم إنشاء طلبك بنجاح!');
       clearCart();

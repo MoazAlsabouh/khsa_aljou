@@ -3,6 +3,22 @@ export interface Location {
   longitude: number;
 }
 
+export interface User {
+  id: number;
+  phone_number: string;
+  email: string;
+  name?: string;
+  profile_image_url?: string;
+  role: 'customer' | 'restaurant_admin' | 'restaurant_manager' | 'manager' | 'admin';
+  is_active: boolean;
+  is_banned: boolean;
+  oauth_provider: string | null;
+  phone_number_verified: boolean;
+  associated_restaurant_id: number | null;
+  created_at?: string;
+  updated_at?: string;
+}
+
 export interface Restaurant {
   id: number;
   name: string;
@@ -29,13 +45,19 @@ export interface MenuItem {
   description: string;
   price: string;
   is_available: boolean;
-  images?: MenuItemImage[];
+  images?: string[];
   removable_ingredients?: string[];
 }
 
-export interface CartItem extends MenuItem {
-  cartItemId: string; // معرف فريد لهذه النسخة في العربة
+
+export interface CartItem {
+  id: number;
+  cartItemId: string;
+  name: string;
+  price: string;
   quantity: number;
+  images?: string[];
+  removable_ingredients?: string[];
   excluded_ingredients: string[];
   notes: string;
 }
@@ -49,6 +71,7 @@ export interface OrderItem {
   excluded_ingredients?: string[];
   notes?: string;
   menu_item_image_url?: string;
+  images?: string[];
 }
 
 export interface Payment {
@@ -76,7 +99,7 @@ interface CustomerDetails {
 export interface Order {
   id: number;
   user_id: number;
-  customer_details: CustomerDetails | null; 
+  customer_details: CustomerDetails | null;
   restaurant_id: number;
   restaurant_name: string;
   status: string;
@@ -139,15 +162,4 @@ export interface RestaurantStats {
         start_date: string;
         end_date: string;
     };
-}
-
-export interface User {
-  id: number;
-  email: string;
-  phone_number: string;
-  role: 'manager' | 'admin' | 'customer' | 'restaurant_admin' | 'restaurant_manager';
-  name?: string;
-  profile_image_url?: string;
-  phone_number_verified?: boolean;
-  associated_restaurant_id?: number;
 }

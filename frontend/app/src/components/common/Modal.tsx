@@ -1,7 +1,4 @@
-import React from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { useConfirmStore } from '../../store/confirmStore';
-import Button from './Button';
+import { motion, AnimatePresence, type Variants } from 'framer-motion';
 
 interface ModalProps {
   isOpen: boolean;
@@ -11,14 +8,14 @@ interface ModalProps {
 }
 
 const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children }) => {
-  const backdropVariants = {
+  const backdropVariants: Variants = {
     visible: { opacity: 1 },
     hidden: { opacity: 0 },
   };
 
-  const modalVariants = {
+  const modalVariants: Variants = {
     hidden: { y: "-50px", opacity: 0 },
-    visible: { y: "0", opacity: 1, transition: { type: "spring", stiffness: 300, damping: 30 } },
+    visible: { y: "0", opacity: 1 },
     exit: { y: "50px", opacity: 0 },
   };
 
@@ -36,6 +33,7 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children }) => {
           <motion.div
             className="bg-white rounded-lg shadow-xl w-full max-w-md flex flex-col max-h-[90vh]"
             variants={modalVariants}
+            transition={{ type: "spring", stiffness: 300, damping: 30 }}
             onClick={(e) => e.stopPropagation()}
           >
             <div className="p-4 border-b flex-shrink-0 flex justify-between items-center">

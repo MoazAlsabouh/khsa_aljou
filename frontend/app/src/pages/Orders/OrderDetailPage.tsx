@@ -1,10 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
 import axiosClient from '../../api/axiosClient';
 import type { Order, Rating, OrderItem } from '../../types';
-import { useForm } from 'react-hook-form';
+import { useForm, type SubmitHandler } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ratingSchema, type RatingFormInputs } from '../../schemas/authSchema';
 import Button from '../../components/common/Button';
@@ -32,11 +32,7 @@ const OrderItemDetails: React.FC<{ item: OrderItem }> = ({ item }) => {
     <div className="bg-gray-50 p-4 rounded-lg">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="md:col-span-1">
-                <img 
-                    src={item.menu_item_image_url || 'https://placehold.co/400x200/EFEFEF/AAAAAA?text=Food'} 
-                    alt={item.name}
-                    className="w-full h-24 object-cover rounded-md"
-                />
+                <ImageSlider images={item.images || []} />
             </div>
             <div className="md:col-span-2">
                 <h4 className="font-bold">{item.quantity} x {item.name}</h4>
@@ -59,10 +55,14 @@ const RatingForm: React.FC<{ orderId: number; onRatingSuccess: (newRating: Ratin
     handleSubmit,
     formState: { errors, isSubmitting },
   } = useForm<RatingFormInputs>({
-    resolver: zodResolver(ratingSchema),
+    resolver: zodResolver(ratingSchema) as any, // <-- حيلة مؤقتة لتجاوز مشكلة النوع
+    defaultValues: {
+      restaurant_rating: 1,
+      comment: '',
+    },
   });
 
-  const onSubmit = async (data: RatingFormInputs) => {
+  const onSubmit: SubmitHandler<RatingFormInputs> = async (data) => {
     const loadingToast = toast.loading('جارٍ إرسال تقييمك...');
     try {
       const response = await axiosClient.post(`/orders/${orderId}/rate`, data);

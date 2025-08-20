@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
 import axiosClient from '../../api/axiosClient';
@@ -12,7 +12,7 @@ const ITEMS_PER_PAGE = 10;
 
 const UsersManagementPage = () => {
   const [users, setUsers] = useState<UserForAdmin[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(true); // تفعيل state للاستخدام الفعلي
   const [selectedUser, setSelectedUser] = useState<UserForAdmin | null>(null);
   const [isRoleModalOpen, setIsRoleModalOpen] = useState(false);
   const [newRole, setNewRole] = useState('');
@@ -93,6 +93,10 @@ const UsersManagementPage = () => {
       toast.error('فشلت العملية.');
     }
   };
+
+  if (isLoading) {
+    return <div className="text-center py-10">جارٍ تحميل قائمة المستخدمين...</div>;
+  }
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>

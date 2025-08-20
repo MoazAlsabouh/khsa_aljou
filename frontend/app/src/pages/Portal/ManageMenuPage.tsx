@@ -1,9 +1,8 @@
-import React, { useEffect, useState, useCallback, useRef } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
-import { useForm } from 'react-hook-form';
+import { useForm, type SubmitHandler } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-
 import axiosClient from '../../api/axiosClient';
 import { useAuthStore } from '../../store/authStore';
 import type { MenuItem, MenuItemImage } from '../../types';
@@ -97,7 +96,7 @@ const ManageMenuPage = () => {
     setExistingImages(prev => prev.filter(img => img.id !== imageId));
   };
 
-  const onSubmit = async (data: MenuItemFormInputs) => {
+  const onSubmit: SubmitHandler<MenuItemFormInputs> = async (data) => {
     const formData = new FormData();
     formData.append('name', data.name);
     formData.append('description', data.description || '');
@@ -196,7 +195,6 @@ const ManageMenuPage = () => {
           
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">صور الوجبة</label>
-            {/* عرض الصور الحالية */}
             {existingImages.length > 0 && (
               <div className="mt-2 grid grid-cols-3 gap-4">
                 {existingImages.map(img => (
@@ -207,7 +205,6 @@ const ManageMenuPage = () => {
                 ))}
               </div>
             )}
-            {/* عرض الصور الجديدة */}
             {imagePreviews.length > 0 && (
               <div className="mt-4 grid grid-cols-3 gap-4">
                 {imagePreviews.map((src, index) => (

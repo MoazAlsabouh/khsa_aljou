@@ -84,7 +84,7 @@ const ProfilePage = () => {
     if (data.phone_number !== user?.phone_number) payload.phone_number = data.phone_number;
 
     if (Object.keys(payload).length === 0) {
-      toast.info('لم تقم بتغيير أي بيانات.');
+      toast('لم تقم بتغيير أي بيانات.');
       setIsEditing(false);
       return;
     }

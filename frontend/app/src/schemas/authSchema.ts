@@ -74,12 +74,6 @@ export const updateProfileSchema = z.object({
   path: ["confirm_new_password"],
 });
 
-// مخطط التحقق لنموذج تقييم الطلب
-export const ratingSchema = z.object({
-  restaurant_rating: z.coerce.number().min(1, { message: 'التقييم مطلوب' }).max(5),
-  comment: z.string().optional(),
-});
-
 // مخطط التحقق لنموذج عنصر القائمة
 export const menuItemSchema = z.object({
   name: z.string().min(1, { message: 'اسم الوجبة مطلوب' }),
@@ -87,6 +81,12 @@ export const menuItemSchema = z.object({
   price: z.coerce.number().min(0, { message: 'يجب أن يكون السعر رقماً موجباً' }),
   is_available: z.boolean(),
   removable_ingredients: z.string().optional(),
+});
+
+// مخطط التحقق لنموذج تقييم الطلب
+export const ratingSchema = z.object({
+  restaurant_rating: z.coerce.number().min(1, { message: 'التقييم مطلوب' }).max(5),
+  comment: z.string().optional(),
 });
 
 // مخطط التحقق لنموذج إعدادات المطعم
@@ -129,8 +129,8 @@ export type VerifyEmailFormInputs = z.infer<typeof verifyEmailSchema>;
 export type ResetPasswordFormInputs = z.infer<typeof resetPasswordSchema>;
 export type OtpFormInputs = z.infer<typeof otpSchema>;
 export type UpdateProfileFormInputs = z.infer<typeof updateProfileSchema>;
-export type RatingFormInputs = z.infer<typeof ratingSchema>;
 export type MenuItemFormInputs = z.infer<typeof menuItemSchema>;
+export type RatingFormInputs = z.infer<typeof ratingSchema>;
 export type RestaurantSettingsFormInputs = z.infer<typeof restaurantSettingsSchema>;
 export type ChangePasswordFormInputs = z.infer<typeof changePasswordSchema>;
 export type ApplyRestaurantFormInputs = z.infer<typeof applyRestaurantSchema>;

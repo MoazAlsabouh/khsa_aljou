@@ -10,6 +10,7 @@ interface AddressState {
   fetchAddresses: () => Promise<void>; // جلب قائمة العناوين
   fetchAndSetDefaultAddress: () => Promise<void>; // جلب وتعيين العنوان الافتراضي
   setDefaultAddress: (addressId: number) => Promise<void>; // دالة لتغيير العنوان الافتراضي
+  setSelectedAddress: (address: UserAddress | null) => void;
 }
 
 export const useAddressStore = create<AddressState>((set, get) => ({
@@ -42,7 +43,7 @@ export const useAddressStore = create<AddressState>((set, get) => ({
         } else {
           set({ selectedAddress: null, isLoading: false });
         }
-      } catch (allError) {
+      } catch (error) {
         toast.error('فشل في جلب العناوين.');
         set({ isLoading: false });
       }
@@ -71,5 +72,8 @@ export const useAddressStore = create<AddressState>((set, get) => ({
       // إعادة جلب البيانات عند الفشل لضمان التناسق
       await get().fetchAddresses();
     }
+  },
+  setSelectedAddress: (address: UserAddress | null) => {
+    set({ selectedAddress: address });
   },
 }));
