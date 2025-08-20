@@ -1,4 +1,5 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
+import { z } from "zod";
 import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
 import { useForm, type SubmitHandler } from 'react-hook-form';
@@ -28,15 +29,15 @@ const ManageMenuPage = () => {
   const { user } = useAuthStore();
   const showConfirm = useConfirmStore((state) => state.show);
 
-  const {
-    register,
-    handleSubmit,
-    reset,
-    formState: { errors, isSubmitting },
-  } = useForm<MenuItemFormInputs>({
-    resolver: zodResolver(menuItemSchema),
-    defaultValues: { is_available: true },
-  });
+const {
+  register,
+  handleSubmit,
+  reset,
+  formState: { errors, isSubmitting },
+} = useForm<z.infer<typeof menuItemSchema>>({
+  resolver: zodResolver(menuItemSchema),
+  defaultValues: { is_available: true },
+});
 
   const fetchMenu = useCallback(async () => {
     if (!user?.associated_restaurant_id) return;
@@ -65,8 +66,7 @@ const ManageMenuPage = () => {
         is_available: item.is_available,
         removable_ingredients: item.removable_ingredients?.join(', ') || ''
       });
-      setExistingImages(item.images || []);
-    } else {
+      setExistingImages(item.images ? item.images.map((img, index) => ({ id: index, image_url: img })) : []);    } else {
       reset({ name: '', description: '', price: 0, is_available: true, removable_ingredients: '' });
       setExistingImages([]);
     }
