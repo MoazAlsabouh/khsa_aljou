@@ -5,7 +5,7 @@ import { useForm, type SubmitHandler } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import axiosClient from '../../api/axiosClient';
 import { useAuthStore } from '../../store/authStore';
-import type { MenuItem, MenuItemImage } from '../../types';
+import type { MenuItem } from '../../types';
 import { menuItemSchema, type MenuItemFormInputs } from '../../schemas/authSchema';
 import Button from '../../components/common/Button';
 import Input from '../../components/common/Input';
@@ -21,8 +21,7 @@ const ManageMenuPage = () => {
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
   
-  const [existingImages, setExistingImages] = useState<MenuItemImage[]>([]);
-  const [imagesToDelete, setImagesToDelete] = useState<number[]>([]);
+  const [existingImages, setExistingImages] = useState<string[]>([]);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { user } = useAuthStore();
@@ -72,7 +71,6 @@ const ManageMenuPage = () => {
     }
     setSelectedFiles([]);
     setImagePreviews([]);
-    setImagesToDelete([]);
     setIsModalOpen(true);
   };
 
@@ -91,11 +89,6 @@ const ManageMenuPage = () => {
     }
   };
 
-  const handleRemoveExistingImage = (imageId: number) => {
-    setImagesToDelete(prev => [...prev, imageId]);
-    setExistingImages(prev => prev.filter(img => img.id !== imageId));
-  };
-
   const onSubmit: SubmitHandler<MenuItemFormInputs> = async (data) => {
     const formData = new FormData();
     formData.append('name', data.name);
@@ -109,10 +102,11 @@ const ManageMenuPage = () => {
     selectedFiles.forEach(file => {
       formData.append('images', file);
     });
-    
-    imagesToDelete.forEach(id => {
-      formData.append('delete_images', String(id));
-    });
+
+    // ملاحظة: تم إيقاف حذف الصور مؤقتاً لأن الواجهة الخلفية لا ترسل IDs الصور
+    // imagesToDelete.forEach(id => {
+    //   formData.append('delete_images', String(id));
+    // });
 
     const apiCall = editingItem
       ? axiosClient.put(`/portal/menu/${editingItem.id}`, formData, { headers: { 'Content-Type': 'multipart/form-data' } })
@@ -197,10 +191,10 @@ const ManageMenuPage = () => {
             <label className="block text-sm font-medium text-gray-700 mb-2">صور الوجبة</label>
             {existingImages.length > 0 && (
               <div className="mt-2 grid grid-cols-3 gap-4">
-                {existingImages.map(img => (
-                  <div key={img.id} className="relative">
-                    <img src={img.image_url} alt="Existing" className="h-24 w-full object-cover rounded-md" />
-                    <button type="button" onClick={() => handleRemoveExistingImage(img.id)} className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 text-xs">&times;</button>
+                {existingImages.map((imgUrl, index) => (
+                  <div key={index} className="relative">
+                    <img src={imgUrl} alt="Existing" className="h-24 w-full object-cover rounded-md" />
+                    {/* <button type="button" onClick={() => handleRemoveExistingImage(img.id)} className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 text-xs">&times;</button> */}
                   </div>
                 ))}
               </div>

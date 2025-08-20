@@ -33,11 +33,6 @@ export interface Restaurant {
   updated_at: string | null;
 }
 
-export interface MenuItemImage {
-    id: number;
-    image_url: string;
-}
-
 export interface MenuItem {
   id: number;
   restaurant_id: number;
@@ -45,10 +40,9 @@ export interface MenuItem {
   description: string;
   price: string;
   is_available: boolean;
-  images?: string[];
+  images?: string[]; // تم التصحيح هنا
   removable_ingredients?: string[];
 }
-
 
 export interface CartItem {
   id: number;
@@ -56,7 +50,7 @@ export interface CartItem {
   name: string;
   price: string;
   quantity: number;
-  images?: string[];
+  images?: string[]; // تم التصحيح هنا
   removable_ingredients?: string[];
   excluded_ingredients: string[];
   notes: string;
