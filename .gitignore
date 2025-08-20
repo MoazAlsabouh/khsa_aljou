@@ -1,0 +1,98 @@
+# =========================
+# عام / أنظمة تشغيل / محررات
+# =========================
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+
+# محررات
+.vscode/
+.idea/
+*.iml
+
+# سجلات مؤقتة
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+
+# أدوات/كاش شائعة
+**/.cache/
+**/.temp/
+**/.DS_Store
+
+# =========================
+# الواجهة الأمامية React (داخل frontend/app)
+# =========================
+/frontend/app/node_modules/
+/frontend/app/.env
+/frontend/app/.env.local
+/frontend/app/.env.*.local
+/frontend/app/.env.*     # احتفظ فقط بـ .env.example إن وجد
+!/frontend/app/.env.example
+
+# مخرجات البناء (لا تُرفع؛ GitHub Pages يُنشر من gh-pages عادة)
+# إذا كنت ستستخدم docs/ للنشر من الفرع الرئيسي، لا تتجاهل docs/
+# وعدّل حسب طريقتك.
+/frontend/app/build/
+/frontend/app/dist/
+/frontend/app/.vite/
+/frontend/app/coverage/
+# أطر محتملة
+/frontend/app/.next/
+/frontend/app/out/
+/frontend/app/.nuxt/
+
+# أدوات الحزم
+/frontend/app/package-lock.json
+# لو تفضل تتبّع lockfile احذف السطرين الجايين
+#/frontend/app/yarn.lock
+#/frontend/app/pnpm-lock.yaml
+
+# =========================
+# الواجهة الخلفية Flask (داخل backend)
+# =========================
+/backend/__pycache__/
+/backend/**/*.py[cod]
+/backend/*$py.class
+
+# بيئات/أسرار
+/backend/.env
+/backend/.flaskenv
+/backend/.python-version
+/backend/instance/          # يحتوي أسرار/ملفات runtime—لا ترفعه عادة
+/backend/venv/
+/backend/.venv/
+/backend/env/
+/backend/ENV/
+
+# بناء بايثون وحزم
+/backend/build/
+/backend/dist/
+/backend/*.egg-info/
+/backend/.pytest_cache/
+/backend/.mypy_cache/
+/backend/.ruff_cache/
+/backend/.coverage
+/backend/coverage.xml
+/backend/htmlcov/
+
+# قواعد بيانات محلية
+/backend/*.sqlite
+/backend/*.sqlite3
+/backend/*.db
+
+# ملاحظات حول الهجرات:
+# احتفِظ بمجلد الميغريشنز في الغالب (لا تتجاهله)
+# /backend/migrations/  ← لا تضف هذا هنا
+
+# مكتبات/بايناريز مُجمّعة
+/backend/**/*.so
+
+# =========================
+# جذر المستودع (إن وُجدت)
+# =========================
+.env
+.env.local
