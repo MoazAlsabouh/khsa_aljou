@@ -9,7 +9,7 @@ interface MenuItemCardProps {
 
 const MenuItemCard: React.FC<MenuItemCardProps> = ({ item, onSelect }) => {
   const firstImage = item.images && item.images.length > 0 
-    ? item.images[0] 
+    ? item.images[0].image_url 
     : 'https://placehold.co/100x100/EFEFEF/AAAAAA?text=Food';
 
   return (

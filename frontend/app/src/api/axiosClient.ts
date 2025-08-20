@@ -1,8 +1,11 @@
 import axios from 'axios';
 import { useAuthStore } from '../store/authStore';
 
-export const API_BASE_URL = 'http://localhost:5000/api/v1'; 
-export const STATIC_FILES_URL = 'http://localhost:5000/static/uploads';
+// export const API_BASE_URL = 'http://localhost:5000/api/v1'; 
+// export const STATIC_FILES_URL = 'http://localhost:5000/static/uploads';
+
+export const API_BASE_URL = 'https://khsa-aljou.onrender.com/api/v1'; 
+export const STATIC_FILES_URL = 'https://khsa-aljou.onrender.com/static/uploads';
 
 
 const axiosClient = axios.create({

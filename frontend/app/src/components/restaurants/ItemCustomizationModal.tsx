@@ -60,7 +60,7 @@ const ItemCustomizationModal: React.FC<ItemCustomizationModalProps> = ({ isOpen,
           <AnimatePresence initial={false}>
             <motion.img
               key={currentIndex}
-              src={(item.images && item.images[currentIndex]) || 'https://placehold.co/400x200/EFEFEF/AAAAAA?text=Food'}
+              src={item.images?.[currentIndex]?.image_url || 'https://placehold.co/400x200/EFEFEF/AAAAAA?text=Food'}
               initial={{ opacity: 0, x: 100 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -100 }}

@@ -51,6 +51,7 @@ export const useCartStore = create<CartState>()(
         } else {
           const newCartItem: CartItem = {
             ...item,
+            images: item.images?.map(img => img.image_url), // <-- تصحيح النوع إلى string[]
             cartItemId: uuidv4(),
             quantity: 1,
             ...customization,

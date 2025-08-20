@@ -7,7 +7,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import axiosClient from '../../api/axiosClient';
 import { useAuthStore } from '../../store/authStore';
 import type { MenuItem, MenuItemImage } from '../../types';
-import { menuItemSchema, type MenuItemFormInputs } from '../../schemas/authSchema';
+import { menuItemSchema } from '../../schemas/authSchema';
 import Button from '../../components/common/Button';
 import Input from '../../components/common/Input';
 import Modal from '../../components/common/Modal';
@@ -29,15 +29,15 @@ const ManageMenuPage = () => {
   const { user } = useAuthStore();
   const showConfirm = useConfirmStore((state) => state.show);
 
-const {
-  register,
-  handleSubmit,
-  reset,
-  formState: { errors, isSubmitting },
-} = useForm<z.infer<typeof menuItemSchema>>({
-  resolver: zodResolver(menuItemSchema),
-  defaultValues: { is_available: true },
-});
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors, isSubmitting },
+  } = useForm<z.input<typeof menuItemSchema>>({
+    resolver: zodResolver(menuItemSchema),
+    defaultValues: { is_available: true },
+  });
 
   const fetchMenu = useCallback(async () => {
     if (!user?.associated_restaurant_id) return;
@@ -66,7 +66,9 @@ const {
         is_available: item.is_available,
         removable_ingredients: item.removable_ingredients?.join(', ') || ''
       });
-      setExistingImages(item.images ? item.images.map((img, index) => ({ id: index, image_url: img })) : []);    } else {
+      // الصور الموجودة تأتي أصلاً كـ MenuItemImage[] (id + image_url)
+      setExistingImages(item.images ?? []);
+    } else {
       reset({ name: '', description: '', price: 0, is_available: true, removable_ingredients: '' });
       setExistingImages([]);
     }
@@ -96,14 +98,14 @@ const {
     setExistingImages(prev => prev.filter(img => img.id !== imageId));
   };
 
-  const onSubmit: SubmitHandler<MenuItemFormInputs> = async (data) => {
+  const onSubmit: SubmitHandler<z.input<typeof menuItemSchema>> = async (data) => {
     const formData = new FormData();
     formData.append('name', data.name);
-    formData.append('description', data.description || '');
-    formData.append('price', String(data.price));
-    formData.append('is_available', String(data.is_available));
-    if (data.removable_ingredients) {
-      formData.append('removable_ingredients', data.removable_ingredients);
+    formData.append('description', (data as any).description || '');
+    formData.append('price', String((data as any).price));
+    formData.append('is_available', String((data as any).is_available));
+    if ((data as any).removable_ingredients) {
+      formData.append('removable_ingredients', (data as any).removable_ingredients);
     }
 
     selectedFiles.forEach(file => {
