@@ -103,12 +103,13 @@ def resend_verification_email():
     if user.email_verification_requests_locked_until and user.email_verification_requests_locked_until > now:
         wait_time = user.email_verification_requests_locked_until - now
         return jsonify({"success": False, "message": f"لقد تجاوزت الحد المسموح به. يرجى المحاولة مرة أخرى بعد {str(wait_time).split('.')[0]}."}), 429
-
-    if user.email_verification_requests_count >= 5:
-        user.email_verification_requests_locked_until = now + timedelta(days=1)
-        user.email_verification_requests_count = 0 # تصفير العداد للدورة القادمة
+    try:
+        send_sms_verification_email(user, generate_otp_code())  # أو دالتك لإرسال البريد
+        user.email_verification_requests_count += 1
         db.session.commit()
-        return jsonify({"success": False, "message": "لقد تجاوزت الحد المسموح به. تم قفل الطلبات لمدة 24 ساعة."}), 429
+        return jsonify({"success": True, "message": "تم إرسال كود التفعيل إلى بريدك الإلكتروني."}), 200
+    except Exception as e:
+        return jsonify({"success": False, "message": f"فشل إرسال البريد: {str(e)}"}), 500
 
 @auth_api_bp.route('/request-password-reset', methods=['POST'])
 def request_password_reset():
