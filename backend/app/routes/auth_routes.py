@@ -104,7 +104,8 @@ def resend_verification_email():
         wait_time = user.email_verification_requests_locked_until - now
         return jsonify({"success": False, "message": f"لقد تجاوزت الحد المسموح به. يرجى المحاولة مرة أخرى بعد {str(wait_time).split('.')[0]}."}), 429
     try:
-        send_sms_verification_email(user, generate_otp_code())  # أو دالتك لإرسال البريد
+        email_verification_code = generate_verification_code()
+        send_email_verification_code(email, email_verification_code)  # أو دالتك لإرسال البريد
         user.email_verification_requests_count += 1
         db.session.commit()
         return jsonify({"success": True, "message": "تم إرسال كود التفعيل إلى بريدك الإلكتروني."}), 200
