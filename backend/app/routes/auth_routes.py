@@ -181,7 +181,7 @@ def request_phone_verification_code(payload):
    db.session.commit()
 
 #    send_sms(user.phone_number, f"رمز التحقق الخاص بك هو: {code}")
-   send_sms_verification_email(user, code)
+   send_sms_verification_email(user, code, method="email")
    return jsonify({"success": True, "message": f"تم إرسال رمز التحقق. المحاولات المتبقية: {5 - user.phone_verification_requests_count}"}), 200
 
 @auth_api_bp.route('/verify-phone', methods=['POST'])
