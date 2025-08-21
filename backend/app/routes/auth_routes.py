@@ -105,9 +105,11 @@ def resend_verification_email():
         return jsonify({"success": False, "message": f"لقد تجاوزت الحد المسموح به. يرجى المحاولة مرة أخرى بعد {str(wait_time).split('.')[0]}."}), 429
     try:
         email_verification_code = generate_verification_code()
-        send_email_verification_code(email, email_verification_code)  # أو دالتك لإرسال البريد
+        user.email_verification_code = email_verification_code
+        user.email_code_expires_at = now + timedelta(minutes=5)
         user.email_verification_requests_count += 1
         db.session.commit()
+        send_email_verification_code(email, email_verification_code)
         return jsonify({"success": True, "message": "تم إرسال كود التفعيل إلى بريدك الإلكتروني."}), 200
     except Exception as e:
         return jsonify({"success": False, "message": f"فشل إرسال البريد: {str(e)}"}), 500
