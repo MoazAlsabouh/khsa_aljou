@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../../store/authStore';
 import toast from 'react-hot-toast';
-import { STATIC_FILES_URL } from '../../api/axiosClient';
 
 const DefaultAvatar = () => (
     <svg className="h-8 w-8 rounded-full text-gray-300 bg-gray-100" fill="currentColor" viewBox="0 0 24 24">
@@ -14,7 +13,6 @@ const Navbar = () => {
   const { user, logout } = useAuthStore();
   const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  
   const isRestaurantManager = user?.role === 'restaurant_manager' || user?.role === 'restaurant_admin';
   const isSiteAdmin = user?.role === 'admin' || user?.role === 'manager';
 
@@ -22,13 +20,6 @@ const Navbar = () => {
     logout();
     toast.success('تم تسجيل الخروج بنجاح.');
     navigate('/login');
-  };
-
-const getImageUrl = (url: string) => {
-    if (url.startsWith('http')) {
-        return url; // الرابط كامل بالفعل (مثل صور OAuth)
-    }
-    return `${STATIC_FILES_URL}/${url}`; // بناء الرابط الكامل للصور المرفوعة
   };
 
 
@@ -45,7 +36,7 @@ const getImageUrl = (url: string) => {
               {user?.profile_image_url ? (
                 <img
                     className="h-8 w-8 rounded-full object-cover"
-                    src={getImageUrl(user.profile_image_url)}
+                    src={user.profile_image_url}
                     alt="User Avatar"
                 />
               ) : (

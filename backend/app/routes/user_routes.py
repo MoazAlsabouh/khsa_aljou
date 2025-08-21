@@ -6,6 +6,7 @@ from app.utils.serializers import serialize_user, serialize_user_address
 from app.utils.auth_helpers import generate_verification_code, generate_numeric_otp
 from app.utils.email_utils import send_email_verification_code
 from app.utils.sms_utils import send_sms_verification_email
+from app.utils.cloudinary_utils import upload_image, delete_image, extract_public_id_from_url
 from werkzeug.utils import secure_filename
 from geoalchemy2.elements import WKTElement
 import os
@@ -59,20 +60,20 @@ def update_user_profile(payload):
     if 'profile_image' in request.files:
         file = request.files['profile_image']
         if file and file.filename != '' and allowed_file(file.filename):
-            filename = secure_filename(file.filename)
-            unique_filename = str(uuid.uuid4()) + "_" + filename
-            file_path = os.path.join(current_app.config['UPLOAD_FOLDER'], unique_filename)
-            file.save(file_path)
-            
-            if user.profile_image_url and not user.profile_image_url.startswith('http'):
-                old_path = os.path.join(current_app.config['UPLOAD_FOLDER'], user.profile_image_url)
-                if os.path.exists(old_path):
-                    os.remove(old_path)
+            if user.profile_image_url:
+                public_id = extract_public_id_from_url(user.profile_image_url)
+                if public_id:
+                    delete_image(public_id)
 
-            user.profile_image_url = unique_filename
-            response_messages.append("تم تحديث الصورة الشخصية.")
+            upload_result = upload_image(file, folder="khsa_aljou/user_profiles")
+            if upload_result:
+                user.profile_image_url = upload_result['secure_url']
+                response_messages.append("تم تحديث الصورة الشخصية.")
+            else:
+                return jsonify({"success": False, "message": "فشل رفع الصورة"}), 500
         elif file and file.filename != '':
             return jsonify({"success": False, "message": "نوع الملف غير مسموح به"}), 400
+
 
     # --- 4. تحديث البريد الإلكتروني ---
     if 'email' in data and data['email'] != user.email:

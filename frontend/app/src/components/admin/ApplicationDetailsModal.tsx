@@ -2,7 +2,6 @@ import React, { useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MapContainer, TileLayer, Marker, GeoJSON } from 'react-leaflet';
 import type { RestaurantApplication } from '../../types';
-import { STATIC_FILES_URL } from '../../api/axiosClient';
 
 interface ApplicationDetailsModalProps {
   isOpen: boolean;
@@ -24,13 +23,6 @@ const ApplicationDetailsModal: React.FC<ApplicationDetailsModalProps> = ({ isOpe
       return null;
     }
   }, [application]);
-
-  const getImageUrl = (url: string) => {
-    if (url.startsWith('http')) {
-        return url;
-    }
-    return `${STATIC_FILES_URL}/${url}`;
-  };
 
   if (!application) return null;
 
@@ -57,7 +49,7 @@ const ApplicationDetailsModal: React.FC<ApplicationDetailsModalProps> = ({ isOpe
               <div className="flex items-start justify-between">
                 <div className="flex items-center gap-4">
                   {application.logo_url && (
-                    <img src={getImageUrl(application.logo_url)} alt="Logo" className="h-16 w-16 rounded-lg object-cover" />
+                    <img src={application.logo_url} alt="Logo" className="h-16 w-16 rounded-lg object-cover" />
                   )}
                   <div>
                     <h2 className="text-2xl font-bold text-gray-900">{application.restaurant_name}</h2>

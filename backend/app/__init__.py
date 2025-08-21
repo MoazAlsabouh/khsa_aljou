@@ -6,6 +6,7 @@ from .routes import register_routes # تم التعديل: استيراد دال
 from .errors.handlers import register_error_handlers # تم التعديل: استيراد دالة تسجيل معالجات الأخطاء
 from .auth.oauth import configure_oauth   # تم التعديل: استيراد دالة تهيئة OAuth من ملفها الجديد
 import os
+import cloudinary
 
 migrate = Migrate()
 
@@ -15,6 +16,13 @@ def create_app():
     app = Flask(__name__)
     app.config.from_object('app.config.Config')
     app.secret_key = app.config.get("SECRET_KEY") # استخدام SECRET_KEY من Config
+
+    # --- جديد: تهيئة Cloudinary ---
+    cloudinary.config(
+        cloud_name = app.config['CLOUDINARY_CLOUD_NAME'],
+        api_key = app.config['CLOUDINARY_API_KEY'],
+        api_secret = app.config['CLOUDINARY_API_SECRET']
+    )
 
     db.init_app(app)
     migrate.init_app(app, db)

@@ -7,7 +7,7 @@ import { Link } from 'react-router-dom';
 
 import { useAuthStore } from '../../store/authStore';
 import { updateProfileSchema, type UpdateProfileFormInputs } from '../../schemas/authSchema';
-import axiosClient, { STATIC_FILES_URL } from '../../api/axiosClient';
+import axiosClient from '../../api/axiosClient';
 import Input from '../../components/common/Input';
 import Button from '../../components/common/Button';
 
@@ -45,12 +45,6 @@ const ProfilePage = () => {
     }
   }, [user, reset]);
 
-  const getImageUrl = (url: string) => {
-    if (url.startsWith('http')) {
-        return url;
-    }
-    return `${STATIC_FILES_URL}/${url}`;
-  };
 
   const handleImageUpload = async (file: File) => {
     const formData = new FormData();
@@ -122,7 +116,7 @@ const ProfilePage = () => {
             {user?.profile_image_url ? (
                 <img
                     className="h-24 w-24 rounded-full object-cover"
-                    src={getImageUrl(user.profile_image_url)}
+                    src={user.profile_image_url}
                     alt="User Avatar"
                 />
             ) : (

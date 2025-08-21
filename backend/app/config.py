@@ -15,6 +15,12 @@ class Config:
     # إعدادات رفع الملفات
     ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 
+    # Cloudinary Credentials
+    CLOUDINARY_CLOUD_NAME = os.getenv("CLOUDINARY_CLOUD_NAME")
+    CLOUDINARY_API_KEY = os.getenv("CLOUDINARY_API_KEY")
+    CLOUDINARY_API_SECRET = os.getenv("CLOUDINARY_API_SECRET")
+
+
     # Google Auth
     GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
     GOOGLE_CLIENT_SECRET = os.getenv("GOOGLE_CLIENT_SECRET")

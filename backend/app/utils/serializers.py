@@ -4,39 +4,13 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-def serialize_user_address(address):
-    location_data = None
-    if address.location:
-        point = to_shape(address.location)
-        location_data = {'latitude': point.y, 'longitude': point.x}
-    
-    return {
-        'id': address.id,
-        'user_id': address.user_id,
-        'name': address.name,
-        'address_line': address.address_line,
-        'location': location_data,
-        'is_default': address.is_default,
-        'created_at': address.created_at.isoformat() if address.created_at else None
-    }
-
 def serialize_user(user):
-    profile_image = None
-    if user.profile_image_url:
-        if user.profile_image_url.startswith('http'):
-            profile_image = user.profile_image_url
-        else:
-            backend_url = os.getenv('BACKEND_URL', 'http://localhost:5000')
-            profile_image = f"{backend_url}/static/uploads/{user.profile_image_url}"
-    else:
-        profile_image = 'https://placehold.co/400x400/EFEFEF/AAAAAA?text=User'
-
     return {
         'id': user.id,
         'phone_number': user.phone_number,
         'email': user.email,
         'name': user.name,
-        'profile_image_url': profile_image,
+        'profile_image_url': user.profile_image_url or 'https://placehold.co/400x400/EFEFEF/AAAAAA?text=User',
         'role': user.role,
         'is_active': user.is_active,
         'is_banned': user.is_banned,
@@ -65,18 +39,13 @@ def serialize_user_address(address):
     }
 
 def serialize_restaurant_application(application):
-    logo_image = None
-    if application.logo_url:
-        backend_url = os.getenv('BACKEND_URL', 'http://localhost:5000')
-        logo_image = f"{backend_url}/static/uploads/{application.logo_url}"
-    
     return {
         'id': application.id,
         'user_id': application.user_id,
         'user_name': application.user.name if application.user else 'N/A',
         'restaurant_name': application.restaurant_name,
         'description': application.description,
-        'logo_url': logo_image,
+        'logo_url': application.logo_url,
         'address': application.address,
         'location_lat': application.location_lat,
         'location_lon': application.location_lon,
@@ -86,9 +55,6 @@ def serialize_restaurant_application(application):
     }
 
 def serialize_menu_item(menu_item):
-    backend_url = os.getenv('BACKEND_URL', 'http://localhost:5000')
-    images = [f"{backend_url}/static/uploads/{img.image_url}" for img in menu_item.images]
-    
     return {
         'id': menu_item.id,
         'restaurant_id': menu_item.restaurant_id,
@@ -96,10 +62,11 @@ def serialize_menu_item(menu_item):
         'description': menu_item.description,
         'price': str(menu_item.price),
         'is_available': menu_item.is_available,
-        'images': images,
+        'images': [img.image_url for img in menu_item.images],
         'removable_ingredients': menu_item.removable_ingredients or [],
         'created_at': menu_item.created_at.isoformat() if menu_item.created_at else None
     }
+
 
 def serialize_restaurant(restaurant):
     location_data = None
@@ -112,19 +79,11 @@ def serialize_restaurant(restaurant):
         polygon = to_shape(restaurant.delivery_area)
         delivery_area_data = polygon.__geo_interface__
 
-    logo_image = None
-    if restaurant.logo_url:
-        if restaurant.logo_url.startswith('http'):
-            logo_image = restaurant.logo_url
-        else:
-            backend_url = os.getenv('BACKEND_URL', 'http://localhost:5000')
-            logo_image = f"{backend_url}/static/uploads/{restaurant.logo_url}"
-
     return {
         'id': restaurant.id,
         'name': restaurant.name,
         'description': restaurant.description,
-        'logo_url': logo_image,
+        'logo_url': restaurant.logo_url or 'https://placehold.co/600x400/EFEFEF/AAAAAA?text=Logo',
         'address': restaurant.address,
         'location': location_data,
         'delivery_area': delivery_area_data,
@@ -135,12 +94,9 @@ def serialize_restaurant(restaurant):
     }
 
 def serialize_order_item(order_item):
-    # تم التعديل: إضافة رابط الصورة
     menu_item_image_url = None
     if order_item.menu_item and order_item.menu_item.images:
-        backend_url = os.getenv('BACKEND_URL', 'http://localhost:5000')
-        image_filename = order_item.menu_item.images[0].image_url
-        menu_item_image_url = f"{backend_url}/static/uploads/{image_filename}"
+        menu_item_image_url = order_item.menu_item.images[0].image_url
 
     return {
         'id': order_item.id,
@@ -150,7 +106,7 @@ def serialize_order_item(order_item):
         'price_at_order': str(order_item.price_at_order),
         'excluded_ingredients': order_item.excluded_ingredients or [],
         'notes': order_item.notes,
-        'menu_item_image_url': menu_item_image_url # جديد: رابط الصورة
+        'menu_item_image_url': menu_item_image_url
     }
 
 def serialize_payment(payment):

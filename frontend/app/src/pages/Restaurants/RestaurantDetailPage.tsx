@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
-import axiosClient, { STATIC_FILES_URL } from '../../api/axiosClient';
+import axiosClient from '../../api/axiosClient';
 import type { Restaurant, MenuItem } from '../../types';
 import MenuItemCard from '../../components/restaurants/MenuItemCard';
 import Cart from '../../components/cart/Cart';
@@ -41,16 +41,6 @@ const RestaurantDetailPage = () => {
     setIsCustomizationModalOpen(true);
   };
 
-  const getImageUrl = (url?: string | null): string | null => {
-    if (!url) {
-      return null;
-    }
-    if (url.startsWith('http')) {
-      return url;
-    }
-    return `${STATIC_FILES_URL}/${url}`;
-  };
-
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-64">
@@ -73,7 +63,7 @@ const RestaurantDetailPage = () => {
               className="bg-white rounded-lg shadow p-6 flex flex-col sm:flex-row items-center gap-6"
           >
               <img 
-                  src={getImageUrl(restaurant.logo_url) || 'https://placehold.co/150x150/EFEFEF/AAAAAA?text=Logo'} 
+                  src={restaurant.logo_url || 'https://placehold.co/150x150/EFEFEF/AAAAAA?text=Logo'} 
                   alt={`${restaurant.name} logo`}
                   className="w-32 h-32 rounded-full object-cover border-4 border-white shadow-md flex-shrink-0"
               />

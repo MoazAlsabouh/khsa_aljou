@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
-import axiosClient, { STATIC_FILES_URL } from '../../api/axiosClient';
+import axiosClient from '../../api/axiosClient';
 import type { RestaurantApplication } from '../../types';
 import Button from '../../components/common/Button';
 import { useConfirmStore } from '../../store/confirmStore';
@@ -80,13 +80,6 @@ const ApplicationsManagementPage = () => {
     setIsModalOpen(true);
   };
 
-  const getImageUrl = (url: string) => {
-    if (url.startsWith('http')) {
-        return url;
-    }
-    return `${STATIC_FILES_URL}/${url}`;
-  };
-
   if (isLoading) {
     return <div className="text-center">جارٍ تحميل الطلبات...</div>;
   }
@@ -103,7 +96,7 @@ const ApplicationsManagementPage = () => {
                   <div className="flex-grow cursor-pointer" onClick={() => handleViewDetails(app)}>
                     <div className="flex items-center gap-4">
                       {app.logo_url && (
-                        <img src={getImageUrl(app.logo_url)} alt="Logo" className="h-12 w-12 rounded-md object-cover flex-shrink-0" />
+                        <img src={app.logo_url} alt="Logo" className="h-12 w-12 rounded-md object-cover flex-shrink-0" />
                       )}
                       <div>
                         <h2 className="font-bold text-lg text-indigo-600">{app.restaurant_name}</h2>

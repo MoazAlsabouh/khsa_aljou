@@ -3,6 +3,7 @@ from app.extensions import db
 from app.models import User, Restaurant, MenuItem, MenuItemImage, Order
 from app.auth.auth import requires_auth
 from app.utils.serializers import serialize_restaurant, serialize_menu_item, serialize_order, serialize_user
+from app.utils.cloudinary_utils import upload_image
 from geoalchemy2.elements import WKTElement
 from sqlalchemy import func, cast, Date
 from datetime import datetime, timezone, timedelta
@@ -217,14 +218,14 @@ def portal_add_menu_item(payload):
 
     for file in files:
         if file and allowed_file(file.filename):
-            filename = secure_filename(file.filename)
-            unique_filename = str(uuid.uuid4()) + "_" + filename
-            file.save(os.path.join(current_app.config['UPLOAD_FOLDER'], unique_filename))
-            new_image = MenuItemImage(menu_item_id=new_item.id, image_url=unique_filename)
-            db.session.add(new_image)
+            upload_result = upload_image(file, folder=f"khsa_aljou/menu_items/{new_item.id}")
+            if upload_result:
+                new_image = MenuItemImage(menu_item_id=new_item.id, image_url=upload_result['secure_url'])
+                db.session.add(new_image)
             
     db.session.commit()
     return jsonify({'success': True, 'message': 'Menu item added', 'menu_item': serialize_menu_item(new_item)}), 201
+
 
 @portal_bp.route('/menu/<int:item_id>', methods=['PUT'])
 @requires_auth(allowed_roles=['restaurant_manager', 'restaurant_admin'])

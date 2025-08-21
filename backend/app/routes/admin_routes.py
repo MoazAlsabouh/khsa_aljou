@@ -3,6 +3,7 @@ from app.extensions import db
 from app.models import User, Restaurant, RestaurantApplication, MenuItem, MenuItemImage
 from app.auth.auth import requires_auth
 from app.utils.serializers import serialize_user, serialize_restaurant_application, serialize_restaurant
+from app.utils.cloudinary_utils import delete_image, extract_public_id_from_url
 from geoalchemy2.elements import WKTElement
 from sqlalchemy import func, or_
 import json
@@ -159,18 +160,22 @@ def force_delete_restaurant(payload, restaurant_id):
         return jsonify({"success": False, "message": "Restaurant not found"}), 404
     
     # --- جديد: جمع أسماء ملفات الصور المراد حذفها ---
-    files_to_delete = []
+    public_ids_to_delete = []
     
     # 1. شعار المطعم
-    if restaurant.logo_url and not restaurant.logo_url.startswith('http'):
-        files_to_delete.append(restaurant.logo_url)
+    if restaurant.logo_url:
+        public_id = extract_public_id_from_url(restaurant.logo_url)
+        if public_id:
+            public_ids_to_delete.append(public_id)
 
-    # 2. صور عناصر قائمة الطعام
     menu_items_ids = [item.id for item in restaurant.menu_items]
     if menu_items_ids:
         images = MenuItemImage.query.filter(MenuItemImage.menu_item_id.in_(menu_items_ids)).all()
         for img in images:
-            files_to_delete.append(img.image_url)
+            public_id = extract_public_id_from_url(img.image_url)
+            if public_id:
+                public_ids_to_delete.append(public_id)
+
 
     try:
         # إعادة تعيين أدوار المستخدمين المرتبطين بالمطعم
@@ -182,17 +187,6 @@ def force_delete_restaurant(payload, restaurant_id):
         # الحذف من قاعدة البيانات (سيشمل كل شيء مرتبط بسبب cascade)
         db.session.delete(restaurant)
         db.session.commit()
-
-        # --- جديد: حذف الملفات من السيرفر بعد نجاح الحذف من قاعدة البيانات ---
-        for filename in files_to_delete:
-            try:
-                file_path = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
-                if os.path.exists(file_path):
-                    os.remove(file_path)
-            except Exception as e:
-                # تسجيل الخطأ في حال فشل حذف ملف معين، لكن لا نوقف العملية
-                print(f"Error deleting file {filename}: {e}")
-
         return jsonify({"success": True, "message": "Restaurant has been permanently deleted."}), 200
     except Exception as e:
         db.session.rollback()
