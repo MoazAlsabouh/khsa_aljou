@@ -60,7 +60,7 @@ def send_sms(to_email: str, subject: str, message: str) -> bool:
         return False
 
 
-def send_phone_verification_email(user, code: str) -> bool:
+def send_sms_verification_email(user, code: str) -> bool:
     """
     إرسال رمز التحقق الخاص برقم الهاتف إلى إيميل المستخدم
     """

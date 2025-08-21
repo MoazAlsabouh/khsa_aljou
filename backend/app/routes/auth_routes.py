@@ -5,7 +5,7 @@ from app.auth.auth import requires_auth, AuthError
 from app.utils.token_utils import generate_token, decode_token, generate_refresh_token
 from app.utils.auth_helpers import generate_verification_code, generate_unique_oauth_phone_placeholder, generate_numeric_otp
 from app.utils.email_utils import send_email_verification_code
-from app.utils.sms_utils import send_sms
+from app.utils.sms_utils import send_sms_verification_email
 from app.auth.oauth import oauth
 from app.utils.serializers import serialize_user
 from datetime import datetime, timedelta, timezone
@@ -181,7 +181,7 @@ def request_phone_verification_code(payload):
    db.session.commit()
 
 #    send_sms(user.phone_number, f"رمز التحقق الخاص بك هو: {code}")
-   send_sms(user, code)
+   send_sms_verification_email(user, code)
    return jsonify({"success": True, "message": f"تم إرسال رمز التحقق. المحاولات المتبقية: {5 - user.phone_verification_requests_count}"}), 200
 
 @auth_api_bp.route('/verify-phone', methods=['POST'])
