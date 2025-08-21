@@ -5,7 +5,7 @@ from app.auth.auth import requires_auth
 from app.utils.serializers import serialize_user, serialize_user_address
 from app.utils.auth_helpers import generate_verification_code, generate_numeric_otp
 from app.utils.email_utils import send_email_verification_code
-from app.utils.sms_utils import send_sms
+from app.utils.sms_utils import send_sms_verification_email
 from werkzeug.utils import secure_filename
 from geoalchemy2.elements import WKTElement
 import os
@@ -98,7 +98,7 @@ def update_user_profile(payload):
         user.phone_number_verified = False
         otp_code = generate_numeric_otp()
         user.phone_verification_code = otp_code
-        send_sms(new_phone, f"رمز التحقق الجديد الخاص بك هو: {otp_code}")
+        send_sms_verification_email(user, otp_code, method="email")
         response_messages.append("تم تحديث رقم الهاتف. يتطلب إعادة التفعيل.")
         re_verification_needed['phone'] = True
 
