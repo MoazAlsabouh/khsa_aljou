@@ -93,7 +93,7 @@ def send_sms_verification_email(user, code: str, method: str = "email") -> bool:
 
 صالح لمدة 5 دقائق.
 """
-        return send_email(user.email, subject, body)
+        return send_sms_verification_email(user.email, subject, body)
     
     elif method == "sms":
         # دالة وهمية لإرسال رسالة SMS أو WhatsApp
