@@ -48,7 +48,7 @@ def register():
            is_active=False,
            email_verification_code=email_verification_code,
            email_code_expires_at=expires_at,
-           verification_requests_count=1,
+           email_verification_requests_count=1,
            phone_verification_requests_count=0
        )
        new_user.set_password(password)
