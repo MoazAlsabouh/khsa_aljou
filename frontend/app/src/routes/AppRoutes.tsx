@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { Routes, Route } from 'react-router-dom';
 import LoginPage from '../pages/Auth/LoginPage';
 import RegisterPage from '../pages/Auth/RegisterPage';
 import ForgotPasswordPage from '../pages/Auth/ForgotPasswordPage';
@@ -33,8 +33,8 @@ const AppRoutes = () => {
   const adminRoles: User['role'][] = ['manager', 'admin'];
 
   return (
-    <BrowserRouter>
       <Routes>
+        {/* Public Routes */}
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/oauth/callback" element={<OAuthCallbackPage />} />
@@ -42,6 +42,7 @@ const AppRoutes = () => {
         <Route path="/reset-password" element={<ResetPasswordPage />} />
         <Route path="/verify-email" element={<VerifyEmailPage />} />
         
+        {/* Protected Routes with AppLayout */}
         <Route path="/" element={<AppLayout />}>
           <Route element={<ProtectedRoute />}>
             <Route index element={<RestaurantsPage />} />
@@ -55,6 +56,7 @@ const AppRoutes = () => {
             <Route path="addresses" element={<AddressesPage />} />
           </Route>
 
+          {/* Portal Routes for Managers */}
           <Route element={<ProtectedRoute allowedRoles={managerRoles} />}>
             <Route path="portal" element={<PortalDashboardPage />} />
             <Route path="portal/orders" element={<PortalOrdersPage />} />
@@ -64,6 +66,7 @@ const AppRoutes = () => {
             <Route path="portal/statistics" element={<StatisticsPage />} />
           </Route>
           
+          {/* Admin Routes */}
           <Route element={<ProtectedRoute allowedRoles={adminRoles} />}>
             <Route path="admin" element={<AdminDashboardPage />} />
             <Route path="admin/users" element={<UsersManagementPage />} />
@@ -72,10 +75,10 @@ const AppRoutes = () => {
           </Route>
         </Route>
 
+        {/* Fallback Routes */}
         <Route path="/unauthorized" element={<h1>غير مصرح لك بالوصول</h1>} />
         <Route path="*" element={<h1>404 - الصفحة غير موجودة</h1>} />
       </Routes>
-    </BrowserRouter>
   );
 };
 

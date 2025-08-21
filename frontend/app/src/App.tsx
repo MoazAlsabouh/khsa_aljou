@@ -1,28 +1,38 @@
+import { BrowserRouter, useNavigate, useLocation } from 'react-router-dom';
 import { useEffect } from 'react';
 import AppRoutes from './routes/AppRoutes';
 import { Toaster } from 'react-hot-toast';
-import ConfirmModal from './components/common/ConfirmModal'; // استيراد المكون الجديد
-import { useAuthStore } from './store/authStore';
-import { useAddressStore } from './store/addressStore';
+import ConfirmModal from './components/common/ConfirmModal';
 
-function App() {
-  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
-  const fetchAddresses = useAddressStore((state) => state.fetchAddresses);
+// مكون مساعد لمعالجة إعادة التوجيه
+const RedirectHandler = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
-    if (isAuthenticated) {
-      fetchAddresses();
+    const redirectPath = sessionStorage.getItem('redirectPath');
+    // تحقق من وجود مسار محفوظ وأنه ليس الصفحة الرئيسية لتجنب الحلقات اللانهائية
+    if (redirectPath && redirectPath !== location.pathname) {
+      sessionStorage.removeItem('redirectPath');
+      navigate(redirectPath, { replace: true });
     }
-  }, [isAuthenticated, fetchAddresses]);
+  }, [navigate, location.pathname]);
 
+  return null; // هذا المكون لا يعرض أي شيء
+};
+
+function App() {
   return (
     <>
       <Toaster 
         position="top-center"
         reverseOrder={false}
       />
-      <ConfirmModal /> {/* إضافة المكون هنا */}
-      <AppRoutes />
+      <ConfirmModal />
+      <BrowserRouter>
+        <RedirectHandler />
+        <AppRoutes />
+      </BrowserRouter>
     </>
   );
 }
