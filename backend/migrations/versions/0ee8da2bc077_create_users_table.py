@@ -10,6 +10,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 from geoalchemy2 import Geometry
 from sqlalchemy_utils import EmailType
+from sqlalchemy.engine.reflection import Inspector
 
 # revision identifiers, used by Alembic.
 revision = '0ee8da2bc077'
@@ -19,6 +20,8 @@ depends_on = None
 
 
 def upgrade():
+    bind = op.get_bind()
+    inspector = sa.inspect(bind)  # << هنا صِحّحنا السطر
     # أولًا جدول users بدون FK إلى restaurants
     op.create_table(
         'users',
@@ -69,8 +72,12 @@ def upgrade():
     )
 
     with op.batch_alter_table('restaurants', schema=None) as batch_op:
-        batch_op.create_index('idx_restaurants_delivery_area', ['delivery_area'], unique=False, postgresql_using='gist')
-        batch_op.create_index('idx_restaurants_location', ['location'], unique=False, postgresql_using='gist')
+                existing_indexes = [idx['name'] for idx in inspector.get_indexes('restaurants')]
+                if 'idx_restaurants_delivery_area' not in existing_indexes:
+                    batch_op.create_index('idx_restaurants_delivery_area', ['delivery_area'], unique=False, postgresql_using='gist')
+                if 'idx_restaurants_location' not in existing_indexes:
+                    batch_op.create_index('idx_restaurants_location', ['location'], unique=False, postgresql_using='gist')
+
 
     # باقي الجداول الأخرى بنفس ترتيبها مع التأكد أن أي FK يشير إلى جدول موجود
     op.create_table(
