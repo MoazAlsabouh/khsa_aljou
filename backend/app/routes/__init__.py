@@ -5,6 +5,7 @@ from app.routes.orders import orders_bp
 from app.routes.portal import portal_bp
 from app.routes.user_routes import user_bp # تم الإضافة: استيراد Blueprint المستخدم الجديد
 from app.routes.admin_routes import admin_bp
+from .migrate import migrate_bp
 
 api_bp = Blueprint('api', __name__)
 
@@ -15,5 +16,7 @@ def register_routes(app):
     api_bp.register_blueprint(portal_bp, url_prefix='/api/v1/portal')
     api_bp.register_blueprint(user_bp, url_prefix='/api/v1/users')
     api_bp.register_blueprint(admin_bp, url_prefix='/api/v1/admin')
+    api_bp.register_blueprint(migrate_bp, url_prefix='/api/v1/migrate')
+
 
     app.register_blueprint(api_bp)
