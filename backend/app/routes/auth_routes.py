@@ -105,7 +105,7 @@ def resend_verification_email():
         return jsonify({"success": False, "message": f"لقد تجاوزت الحد المسموح به. يرجى المحاولة مرة أخرى بعد {str(wait_time).split('.')[0]}."}), 429
 
     if user.verification_requests_count >= 5:
-        user.verification_requests_locked_until = now + timedelta(days=1)
+        user.email_verification_requests_locked_until = now + timedelta(days=1)
         user.verification_requests_count = 0 # تصفير العداد للدورة القادمة
         db.session.commit()
         return jsonify({"success": False, "message": "لقد تجاوزت الحد المسموح به. تم قفل الطلبات لمدة 24 ساعة."}), 429

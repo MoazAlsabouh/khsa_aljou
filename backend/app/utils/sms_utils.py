@@ -79,6 +79,7 @@ def send_email(to_email: str, subject: str, body: str) -> bool:
         print(f"❌ Failed to send email to {to_email}: {e}")
         return False
 
+
 # دالة إرسال رمز التحقق لأي غرض
 def send_sms_verification_email(user, code: str, method: str = "email") -> bool:
     """
@@ -93,7 +94,8 @@ def send_sms_verification_email(user, code: str, method: str = "email") -> bool:
 
 صالح لمدة 5 دقائق.
 """
-        return send_sms_verification_email(user.email, subject, body)
+        # ✅ هنا نصحح الخطأ: نستدعي send_email بدل ما نستدعي send_sms_verification_email
+        return send_email(user.email, subject, body)
     
     elif method == "sms":
         # دالة وهمية لإرسال رسالة SMS أو WhatsApp
