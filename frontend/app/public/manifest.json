@@ -1,0 +1,65 @@
+{
+  "name": "خسى الجوع - توصيل فوري في سوريا",
+  "short_name": "خسى الجوع",
+  "description": "المنصة الرائدة لتوصيل الطعام والمطاعم في سوريا - تتبع فوري مباشر على الخريطة ودعم العملة السورية الجديدة 2026",
+  "start_url": "/khsa_aljou/",
+  "scope": "/khsa_aljou/",
+  "display": "standalone",
+  "display_override": ["window-controls-overlay", "standalone", "minimal-ui"],
+  "orientation": "portrait-primary",
+  "background_color": "#FFFFFF",
+  "theme_color": "#DC2626",
+  "dir": "rtl",
+  "lang": "ar",
+  "categories": ["food", "delivery", "shopping", "lifestyle"],
+  "icons": [
+    {
+      "src": "pwa-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "pwa-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "pwa-maskable-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "المطاعم والوجبات",
+      "short_name": "الرئيسية",
+      "description": "استكشف أشهى المطاعم والوجبات القريبة منك",
+      "url": "/khsa_aljou/",
+      "icons": [{ "src": "pwa-192x192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "متابعة طلباتي",
+      "short_name": "طلباتي",
+      "description": "تتبع حالة طلبك وموقع المندوب لحظة بلحظة",
+      "url": "/khsa_aljou/orders",
+      "icons": [{ "src": "pwa-192x192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "بوابة المندوب",
+      "short_name": "المندوب",
+      "description": "استلام الطلبات وبث إحداثيات التوصيل",
+      "url": "/khsa_aljou/courier",
+      "icons": [{ "src": "pwa-192x192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "لوحة الإدارة",
+      "short_name": "الإدارة",
+      "description": "التقارير المالية وإدارة المطاعم والمستخدمين",
+      "url": "/khsa_aljou/admin",
+      "icons": [{ "src": "pwa-192x192.png", "sizes": "192x192" }]
+    }
+  ]
+}

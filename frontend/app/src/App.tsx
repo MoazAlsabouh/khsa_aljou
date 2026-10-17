@@ -3,6 +3,7 @@ import { useEffect } from 'react';
 import AppRoutes from './routes/AppRoutes';
 import { Toaster } from 'react-hot-toast';
 import ConfirmModal from './components/common/ConfirmModal';
+import PWAInstallBanner from './components/common/PWAInstallBanner';
 
 // مكون مساعد لمعالجة إعادة التوجيه
 const RedirectHandler = () => {
@@ -62,6 +63,7 @@ function App() {
         }}
       />
       <ConfirmModal />
+      <PWAInstallBanner />
       <BrowserRouter basename={import.meta.env.BASE_URL}>
         <RedirectHandler />
         <AppRoutes />

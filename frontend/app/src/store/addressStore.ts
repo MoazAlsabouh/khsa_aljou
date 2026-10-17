@@ -32,21 +32,15 @@ export const useAddressStore = create<AddressState>((set, get) => ({
     set({ isLoading: true });
     try {
       const response = await axiosClient.get('/users/me/addresses/default');
-      set({ selectedAddress: response.data, isLoading: false });
-    } catch (error) {
-      // لا يوجد عنوان افتراضي، لذا سنجلب الكل ونختار الأول
-      try {
+      if (response.data) {
+        set({ selectedAddress: response.data, isLoading: false });
+      } else {
         const allResponse = await axiosClient.get('/users/me/addresses');
-        const allAddresses: UserAddress[] = allResponse.data;
-        if (allAddresses.length > 0) {
-          set({ selectedAddress: allAddresses[0], isLoading: false });
-        } else {
-          set({ selectedAddress: null, isLoading: false });
-        }
-      } catch (error) {
-        toast.error('فشل في جلب العناوين.');
-        set({ isLoading: false });
+        const allAddresses: UserAddress[] = allResponse.data || [];
+        set({ selectedAddress: allAddresses.length > 0 ? allAddresses[0] : null, isLoading: false });
       }
+    } catch (error) {
+      set({ selectedAddress: null, isLoading: false });
     }
   },
 
