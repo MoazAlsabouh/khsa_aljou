@@ -1,11 +1,26 @@
 import os
 from dotenv import load_dotenv
 
-load_dotenv()  # لتحميل متغيرات البيئة من ملف .env
+# محاولة تحميل .env من مسار app/.env أولاً ثم المسار الحالي
+env_path = os.path.join(os.path.dirname(__file__), '.env')
+if os.path.exists(env_path):
+    load_dotenv(env_path)
+else:
+    load_dotenv()
+
+def get_database_url():
+    raw_url = os.getenv("DATABASE_URL")
+    if not raw_url:
+        return None
+    url = raw_url.strip().strip('"').strip("'")
+    # تصحيح بادئة postgres:// الخاصة بـ Render/Heroku لتصبح postgresql:// المتوافقة مع SQLAlchemy 2.0
+    if url.startswith("postgres://"):
+        url = url.replace("postgres://", "postgresql://", 1)
+    return url
 
 class Config:
     # URI اتصال قاعدة البيانات PostgreSQL
-    SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL")  # يجب أن يحتوي .env على رابط البوستغرس
+    SQLALCHEMY_DATABASE_URI = get_database_url()
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     
     # إعدادات Flask-JWT-Extended
