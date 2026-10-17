@@ -6,11 +6,15 @@ import type { Order } from '../../types';
 import OrderCard from '../../components/portal/OrderCard';
 import NewOrderModal from '../../components/portal/NewOrderModal';
 import { useNewOrderStore } from '../../store/newOrderStore';
+import { useAuthStore } from '../../store/authStore';
+import { io, Socket } from 'socket.io-client';
+import { BACKEND_URL } from '../../api/axiosClient';
 
 const PortalOrdersPage = () => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const addOrdersToQueue = useNewOrderStore(state => state.addOrdersToQueue);
+  const user = useAuthStore(state => state.user);
 
   const fetchOrders = useCallback(async (isInitialLoad = false) => {
     if (isInitialLoad) setIsLoading(true);
@@ -27,10 +31,32 @@ const PortalOrdersPage = () => {
   }, [addOrdersToQueue]);
 
   useEffect(() => {
-    fetchOrders(true); // الجلب عند تحميل الصفحة مع عرض مؤشر التحميل
-    const interval = setInterval(() => fetchOrders(false), 15000); // التحقق الدوري بدون مؤشر تحميل
-    return () => clearInterval(interval);
-  }, [fetchOrders]);
+    fetchOrders(true);
+    
+    // إعداد الـ WebSocket
+    let socket: Socket;
+    if (user?.associated_restaurant_id) {
+      socket = io(BACKEND_URL);
+      
+      socket.on('connect', () => {
+        console.log('Connected to WebSocket server');
+        socket.emit('join_restaurant_room', { restaurant_id: user.associated_restaurant_id });
+      });
+
+      socket.on('new_order', (data) => {
+        toast.success(data.message || 'طلب جديد وصل!', { icon: '🔔', duration: 5000 });
+        // تشغيل صوت تنبيه
+        const audio = new Audio('/notification.mp3');
+        audio.play().catch(e => console.error("Audio play failed:", e));
+        
+        fetchOrders(false); // إعادة جلب الطلبات
+      });
+    }
+
+    return () => {
+      if (socket) socket.disconnect();
+    };
+  }, [fetchOrders, user?.associated_restaurant_id]);
 
   const handleStatusChange = async (orderId: number, newStatus: string) => {
     const loadingToast = toast.loading('جارٍ تحديث الحالة...');

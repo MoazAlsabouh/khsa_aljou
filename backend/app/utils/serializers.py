@@ -137,6 +137,26 @@ def serialize_order(order):
         point = to_shape(order.delivery_location)
         delivery_location_data = {'latitude': point.y, 'longitude': point.x}
 
+    restaurant_location_data = None
+    if order.restaurant_obj and order.restaurant_obj.location:
+        r_point = to_shape(order.restaurant_obj.location)
+        restaurant_location_data = {'latitude': r_point.y, 'longitude': r_point.x}
+
+    courier_details = None
+    if order.courier:
+        c_loc = None
+        if order.courier.current_location:
+            c_point = to_shape(order.courier.current_location)
+            c_loc = {'latitude': c_point.y, 'longitude': c_point.x}
+        courier_details = {
+            'id': order.courier.id,
+            'name': order.courier.user.name if order.courier.user else 'مندوب توصيل',
+            'phone_number': order.courier.user.phone_number if order.courier.user else None,
+            'vehicle_type': order.courier.vehicle_type,
+            'vehicle_plate': order.courier.vehicle_plate,
+            'current_location': c_loc
+        }
+
     customer_details = None
     if order.customer:
         customer_details = {
@@ -151,9 +171,14 @@ def serialize_order(order):
         'customer_details': customer_details,
         'restaurant_id': order.restaurant_id,
         'restaurant_name': order.restaurant_obj.name if order.restaurant_obj else None,
+        'restaurant_location': restaurant_location_data,
+        'courier_details': courier_details,
         'status': order.status,
         'total_price': str(order.total_price),
+        'discount_amount': order.discount_amount or 0,
+        'coupon_code': order.coupon_code,
         'delivery_address': order.delivery_address,
+        'notes': order.notes,
         'delivery_location': delivery_location_data,
         'created_at': order.created_at.isoformat() if order.created_at else None,
         'updated_at': order.updated_at.isoformat() if order.updated_at else None,

@@ -9,7 +9,7 @@ export interface User {
   email: string;
   name?: string;
   profile_image_url?: string;
-  role: 'customer' | 'restaurant_admin' | 'restaurant_manager' | 'manager' | 'admin';
+  role: 'customer' | 'courier' | 'restaurant_admin' | 'restaurant_manager' | 'manager' | 'admin';
   is_active: boolean;
   is_banned: boolean;
   oauth_provider: string | null;
@@ -95,15 +95,45 @@ interface CustomerDetails {
     phone_number: string;
 }
 
+export interface CourierDetails {
+    id: number;
+    name: string;
+    phone_number: string | null;
+    vehicle_type: string | null;
+    vehicle_plate: string | null;
+    current_location: Location | null;
+}
+
+export interface Coupon {
+    id: number;
+    code: string;
+    description: string | null;
+    discount_type: 'percentage' | 'fixed';
+    discount_value: number;
+    min_order_amount: number;
+    max_discount_amount: number | null;
+    restaurant_id: number | null;
+    usage_limit: number | null;
+    used_count: number;
+    is_active: boolean;
+    expires_at: string | null;
+    created_at: string | null;
+}
+
 export interface Order {
   id: number;
   user_id: number;
   customer_details: CustomerDetails | null;
   restaurant_id: number;
   restaurant_name: string;
+  restaurant_location?: Location | null;
+  courier_details?: CourierDetails | null;
   status: string;
   total_price: string;
+  discount_amount?: number;
+  coupon_code?: string | null;
   delivery_address: string;
+  notes?: string | null;
   delivery_location: Location | null;
   created_at: string;
   updated_at: string;

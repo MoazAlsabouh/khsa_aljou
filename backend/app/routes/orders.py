@@ -22,7 +22,9 @@ def create_order(payload):
     items = data.get('items')
     delivery_address = data.get('delivery_address')
     delivery_location_data = data.get('delivery_location')
-    payment_method = data.get('payment_method', 'cash_on_delivery')
+    notes = data.get('notes')
+    coupon_code = (data.get('coupon_code') or '').strip().upper() or None
+    payment_method = data.get('payment_method', 'cash')
 
     if not all([restaurant_id, items, delivery_address, delivery_location_data]):
         return jsonify({'message': 'بيانات الطلب غير مكتملة'}), 400
@@ -58,6 +60,22 @@ def create_order(payload):
             excluded_ingredients=item_data.get('excluded_ingredients'),
             notes=item_data.get('notes')
         ))
+
+    # التحقق من الكوبون وتطبيق الخصم إن وُجد
+    discount_amount = 0
+    applied_coupon = None
+    if coupon_code:
+        from app.models import Coupon
+        applied_coupon = Coupon.query.filter(func.upper(Coupon.code) == coupon_code, Coupon.is_active == True).first()
+        if applied_coupon:
+            discount_amount = applied_coupon.calculate_discount(total_price)
+            if discount_amount > 0:
+                total_price = max(0, total_price - discount_amount)
+                applied_coupon.used_count = (applied_coupon.used_count or 0) + 1
+            else:
+                coupon_code = None
+        else:
+            coupon_code = None
     
     delivery_location_wkt = WKTElement(f'POINT({delivery_location_data["longitude"]} {delivery_location_data["latitude"]})', srid=4326)
 
@@ -66,8 +84,11 @@ def create_order(payload):
             user_id=user_id,
             restaurant_id=restaurant_id,
             total_price=total_price,
+            discount_amount=discount_amount,
+            coupon_code=coupon_code,
             delivery_address=delivery_address,
             delivery_location=delivery_location_wkt,
+            notes=notes,
             status='pending'
         )
         db.session.add(new_order)

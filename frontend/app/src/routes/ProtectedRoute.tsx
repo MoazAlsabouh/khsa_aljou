@@ -2,8 +2,10 @@ import React from 'react';
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
 
+import type { User } from '../types';
+
 interface ProtectedRouteProps {
-  allowedRoles?: ('user' | 'manager' | 'admin' | 'customer' | 'restaurant_admin' | 'restaurant_manager')[];
+  allowedRoles?: User['role'][];
 }
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ allowedRoles }) => {

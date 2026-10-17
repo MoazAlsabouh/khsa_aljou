@@ -7,6 +7,7 @@ import type { Restaurant } from '../../types';
 import RestaurantCard from '../../components/restaurants/RestaurantCard';
 import AddressBar from '../../components/restaurants/AddressBar';
 import { useAddressStore } from '../../store/addressStore';
+import RecommendationSection from '../../components/recommendations/RecommendationSection';
 
 const RestaurantsPage = () => {
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
@@ -54,6 +55,8 @@ const RestaurantsPage = () => {
 
       {!isAddressLoading && addresses.length > 0 && (
         <div>
+          <RecommendationSection />
+          
           {isLoading ? (
             <div className="text-center py-10">جارٍ البحث عن المطاعم...</div>
           ) : restaurants.length > 0 ? (

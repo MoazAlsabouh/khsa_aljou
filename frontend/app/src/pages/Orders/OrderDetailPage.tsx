@@ -2,17 +2,21 @@ import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
-import axiosClient from '../../api/axiosClient';
+import axiosClient, { BACKEND_URL } from '../../api/axiosClient';
 import type { Order, Rating, OrderItem } from '../../types';
 import { useForm, type SubmitHandler } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ratingSchema, type RatingFormInputs } from '../../schemas/authSchema';
 import Button from '../../components/common/Button';
 import ImageSlider from '../../components/common/ImageSlider';
+import LiveTrackingMap from '../../components/orders/LiveTrackingMap';
+import { io, Socket } from 'socket.io-client';
 
 const translatePaymentMethod = (method: string) => {
     const map: { [key: string]: string } = {
-        'cash_on_delivery': 'الدفع عند التوصيل',
+        'cash': 'الدفع عند الاستلام',
+        'cash_on_delivery': 'الدفع عند الاستلام',
+        'paymera': 'الدفع المباشر (بيميرا / بطاقة)',
         'digital_payment': 'الدفع الرقمي'
     };
     return map[method] || method;
@@ -21,8 +25,23 @@ const translatePaymentMethod = (method: string) => {
 const translatePaymentStatus = (status: string) => {
     const map: { [key: string]: string } = {
         'pending': 'معلق',
+        'completed': 'مدفوع / مؤكد',
         'paid': 'مدفوع',
         'failed': 'فشل'
+    };
+    return map[status] || status;
+};
+
+const translateOrderStatus = (status: string) => {
+    const map: { [key: string]: string } = {
+        'pending': 'قيد المراجعة',
+        'accepted': 'تم قبول الطلب',
+        'preparing': 'قيد التحضير بالمطعم 👨‍🍳',
+        'ready_for_pickup': 'جاهز بانتظار المندوب 📦',
+        'picked_up': 'تم الاستلام من المطعم 🛵',
+        'on_the_way': 'في الطريق إليك 🛵',
+        'delivered': 'تم التوصيل بنجاح ✅',
+        'cancelled': 'ملغي ❌'
     };
     return map[status] || status;
 };
@@ -36,7 +55,7 @@ const OrderItemDetails: React.FC<{ item: OrderItem }> = ({ item }) => {
             </div>
             <div className="md:col-span-2">
                 <h4 className="font-bold">{item.quantity} x {item.name}</h4>
-                <p className="text-sm text-gray-600">السعر: {(item.quantity * parseFloat(item.price_at_order)).toFixed(2)} ليرة</p>
+                <p className="text-sm text-gray-600">السعر: {(item.quantity * parseInt(item.price_at_order, 10)).toLocaleString('ar-SY')} ل.س</p>
                 {item.excluded_ingredients && item.excluded_ingredients.length > 0 && (
                     <p className="text-xs text-red-500 mt-1">بدون: {item.excluded_ingredients.join(', ')}</p>
                 )}
@@ -55,7 +74,7 @@ const RatingForm: React.FC<{ orderId: number; onRatingSuccess: (newRating: Ratin
     handleSubmit,
     formState: { errors, isSubmitting },
   } = useForm<RatingFormInputs>({
-    resolver: zodResolver(ratingSchema) as any, // <-- حيلة مؤقتة لتجاوز مشكلة النوع
+    resolver: zodResolver(ratingSchema) as any,
     defaultValues: {
       restaurant_rating: 1,
       comment: '',
@@ -111,6 +130,7 @@ const OrderDetailPage = () => {
   const { orderId } = useParams<{ orderId: string }>();
   const [order, setOrder] = useState<Order | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [courierLocation, setCourierLocation] = useState<{lat: number, lon: number} | null>(null);
 
   useEffect(() => {
     const fetchOrder = async () => {
@@ -118,7 +138,14 @@ const OrderDetailPage = () => {
       setIsLoading(true);
       try {
         const response = await axiosClient.get(`/orders/${orderId}`);
-        setOrder(response.data);
+        const orderData: Order = response.data;
+        setOrder(orderData);
+        if (orderData.courier_details?.current_location) {
+          setCourierLocation({
+            lat: orderData.courier_details.current_location.latitude,
+            lon: orderData.courier_details.current_location.longitude,
+          });
+        }
       } catch (error) {
         toast.error('فشل في جلب تفاصيل الطلب.');
       } finally {
@@ -126,6 +153,33 @@ const OrderDetailPage = () => {
       }
     };
     fetchOrder();
+
+    // إعداد التتبع اللحظي عبر WebSockets
+    let socket: Socket;
+    if (orderId) {
+      socket = io(BACKEND_URL);
+      
+      socket.on('connect', () => {
+        socket.emit('join_order_room', { order_id: orderId });
+      });
+
+      socket.on('order_status_update', (data: any) => {
+        if (data.order_id === parseInt(orderId)) {
+            setOrder(prev => prev ? {...prev, status: data.status} : null);
+            toast.success(`تحديث: حالة طلبك أصبحت "${translateOrderStatus(data.status)}"`);
+        }
+      });
+
+      socket.on('courier_location_update', (data: any) => {
+        if (data.order_id === parseInt(orderId)) {
+            setCourierLocation({ lat: data.lat, lon: data.lon });
+        }
+      });
+    }
+
+    return () => {
+        if (socket) socket.disconnect();
+    };
   }, [orderId]);
 
   if (isLoading) {
@@ -147,12 +201,27 @@ const OrderDetailPage = () => {
           <div>
             <h1 className="text-3xl font-bold text-gray-900">تفاصيل الطلب رقم #{order.id}</h1>
             <p className="text-gray-500">من مطعم <Link to={`/restaurants/${order.restaurant_id}`} className="font-semibold text-indigo-600">{order.restaurant_name}</Link></p>
-            <p className="text-sm text-gray-500 mt-1">{new Date(order.created_at).toLocaleString('ar-SA')}</p>
+            <p className="text-sm text-gray-500 mt-1">{new Date(order.created_at).toLocaleString('ar-SY')}</p>
           </div>
-          <span className="px-3 py-1 text-sm font-semibold rounded-full bg-blue-100 text-blue-800">
-            {order.status}
+          <span className="px-3 py-1.5 text-sm font-bold rounded-full bg-indigo-100 text-indigo-800">
+            {translateOrderStatus(order.status)}
           </span>
         </div>
+
+        {/* خريطة التتبع الحية للمندوب والطلب */}
+        {order.status !== 'cancelled' && (
+          <LiveTrackingMap
+            restaurantName={order.restaurant_name}
+            restaurantLocation={order.restaurant_location}
+            deliveryAddress={order.delivery_address}
+            deliveryLocation={order.delivery_location}
+            courierLocation={courierLocation}
+            courierName={order.courier_details?.name}
+            courierPhone={order.courier_details?.phone_number}
+            vehicleType={order.courier_details?.vehicle_type}
+            orderStatus={order.status}
+          />
+        )}
 
         <hr className="my-6" />
 
@@ -170,7 +239,7 @@ const OrderDetailPage = () => {
         <div className="space-y-2">
           <div className="flex justify-between font-semibold">
             <span>الإجمالي</span>
-            <span>{order.total_price} ليرة</span>
+            <span>{parseInt(order.total_price, 10).toLocaleString('ar-SY')} ل.س</span>
           </div>
           <div className="flex justify-between">
             <span>طريقة الدفع</span>
@@ -187,6 +256,11 @@ const OrderDetailPage = () => {
         <div>
           <h2 className="text-xl font-bold mb-2">عنوان التوصيل</h2>
           <p className="text-gray-600">{order.delivery_address}</p>
+          {order.notes && (
+            <p className="text-sm text-amber-700 bg-amber-50 p-2 rounded mt-2 border border-amber-200">
+              <strong>ملاحظات التوصيل / الصرافة:</strong> {order.notes}
+            </p>
+          )}
         </div>
         
         <div className="mt-6">

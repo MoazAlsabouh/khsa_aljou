@@ -10,7 +10,7 @@ class MenuItem(db.Model):
    name = db.Column(db.String(100), nullable=False)
    description = db.Column(db.Text, nullable=True)
    removable_ingredients = db.Column(JSONB, nullable=True) # e.g., ["بصل", "مخلل"]
-   price = db.Column(db.Numeric(10, 2), nullable=False)
+   price = db.Column(db.Integer, nullable=False)
    is_available = db.Column(db.Boolean, default=True)
    created_at = db.Column(db.TIMESTAMP(timezone=True), server_default=func.now())
    updated_at = db.Column(db.TIMESTAMP(timezone=True), onupdate=func.now())

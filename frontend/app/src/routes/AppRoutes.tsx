@@ -18,12 +18,14 @@ import AdminDashboardPage from '../pages/Admin/AdminDashboardPage';
 import UsersManagementPage from '../pages/Admin/UsersManagementPage';
 import ApplicationsManagementPage from '../pages/Admin/ApplicationsManagementPage';
 import RestaurantsManagementPage from '../pages/Admin/RestaurantsManagementPage';
+import CouponsManagementPage from '../pages/Admin/CouponsManagementPage';
 import PortalDashboardPage from '../pages/Portal/PortalDashboardPage';
 import PortalOrdersPage from '../pages/Portal/PortalOrdersPage';
 import ManageMenuPage from '../pages/Portal/ManageMenuPage';
 import RestaurantSettingsPage from '../pages/Portal/RestaurantSettingsPage';
 import TeamManagementPage from '../pages/Portal/TeamManagementPage';
 import StatisticsPage from '../pages/Portal/StatisticsPage';
+import CourierDashboardPage from '../pages/Courier/CourierDashboardPage';
 import ProtectedRoute from './ProtectedRoute';
 import AppLayout from '../components/layout/AppLayout';
 import type { User } from '../types';
@@ -31,6 +33,7 @@ import type { User } from '../types';
 const AppRoutes = () => {
   const managerRoles: User['role'][] = ['restaurant_manager', 'restaurant_admin'];
   const adminRoles: User['role'][] = ['manager', 'admin'];
+  const courierRoles: User['role'][] = ['courier', 'manager', 'admin'];
 
   return (
       <Routes>
@@ -65,6 +68,11 @@ const AppRoutes = () => {
             <Route path="portal/team" element={<TeamManagementPage />} />
             <Route path="portal/statistics" element={<StatisticsPage />} />
           </Route>
+
+          {/* Courier Portal Routes */}
+          <Route element={<ProtectedRoute allowedRoles={courierRoles} />}>
+            <Route path="courier" element={<CourierDashboardPage />} />
+          </Route>
           
           {/* Admin Routes */}
           <Route element={<ProtectedRoute allowedRoles={adminRoles} />}>
@@ -72,6 +80,7 @@ const AppRoutes = () => {
             <Route path="admin/users" element={<UsersManagementPage />} />
             <Route path="admin/applications" element={<ApplicationsManagementPage />} />
             <Route path="admin/restaurants" element={<RestaurantsManagementPage />} />
+            <Route path="admin/coupons" element={<CouponsManagementPage />} />
           </Route>
         </Route>
 

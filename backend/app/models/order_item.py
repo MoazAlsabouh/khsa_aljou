@@ -8,7 +8,7 @@ class OrderItem(db.Model):
     order_id = db.Column(db.Integer, db.ForeignKey('orders.id'), nullable=False)
     menu_item_id = db.Column(db.Integer, db.ForeignKey('menu_items.id'), nullable=False)
     quantity = db.Column(db.Integer, nullable=False)
-    price_at_order = db.Column(db.Numeric(10, 2), nullable=False)
+    price_at_order = db.Column(db.Integer, nullable=False)
     excluded_ingredients = db.Column(JSONB, nullable=True) # المكونات التي أزالها المستخدم
     notes = db.Column(db.Text, nullable=True) # ملاحظات إضافية من المستخدم
 

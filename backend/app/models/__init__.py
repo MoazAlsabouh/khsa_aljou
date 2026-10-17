@@ -9,3 +9,5 @@ from .order_item import OrderItem
 from .rating import Rating
 from .payment import Payment
 from .session import Session
+from .courier import Courier
+from .coupon import Coupon

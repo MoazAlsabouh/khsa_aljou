@@ -27,6 +27,9 @@ def create_app():
     db.init_app(app)
     migrate.init_app(app, db)
     cors.init_app(app) # تهيئة CORS مع التطبيق
+    
+    from .websocket import socketio
+    socketio.init_app(app)
 
     register_routes(app) # تسجيل جميع مسارات الـ API (بما في ذلك المصادقة)
     register_error_handlers(app) # تسجيل معالجات الأخطاء

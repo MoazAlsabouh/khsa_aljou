@@ -118,11 +118,12 @@ const UsersManagementPage = () => {
               className="block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
             >
               <option value="">كل الأدوار</option>
-              <option value="customer">Customer</option>
-              <option value="restaurant_manager">Restaurant Manager</option>
-              <option value="restaurant_admin">Restaurant Admin</option>
-              <option value="manager">Manager</option>
-              <option value="admin">Admin</option>
+              <option value="customer">Customer (عميل)</option>
+              <option value="courier">Courier (مندوب توصيل)</option>
+              <option value="restaurant_manager">Restaurant Manager (مدير مطعم)</option>
+              <option value="restaurant_admin">Restaurant Admin (مشرف مطعم)</option>
+              <option value="manager">Manager (مدير نظام)</option>
+              <option value="admin">Admin (أدمن)</option>
             </select>
         </div>
       </div>

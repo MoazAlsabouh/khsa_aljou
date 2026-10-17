@@ -15,6 +15,7 @@ const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const isRestaurantManager = user?.role === 'restaurant_manager' || user?.role === 'restaurant_admin';
   const isSiteAdmin = user?.role === 'admin' || user?.role === 'manager';
+  const isCourier = user?.role === 'courier' || isSiteAdmin;
 
   const handleLogout = () => {
     logout();
@@ -60,7 +61,12 @@ const Navbar = () => {
                       بوابة المطعم
                     </Link>
                   )}
-                  {!isRestaurantManager && !isSiteAdmin && (
+                  {isCourier && (
+                    <Link to="/courier" className="block px-4 py-2 text-sm text-indigo-700 font-semibold hover:bg-gray-100 text-right" onClick={() => setIsMenuOpen(false)}>
+                      🛵 بوابة المندوب
+                    </Link>
+                  )}
+                  {!isRestaurantManager && !isSiteAdmin && user?.role !== 'courier' && (
                     <Link to="/apply-restaurant" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 text-right" onClick={() => setIsMenuOpen(false)}>
                       كن شريكاً معنا
                     </Link>
@@ -79,6 +85,11 @@ const Navbar = () => {
             {isSiteAdmin && (
                 <Link to="/admin" className="text-sm font-medium text-red-600 hover:text-red-500">
                     لوحة التحكم
+                </Link>
+            )}
+            {isCourier && (
+                <Link to="/courier" className="text-sm font-bold text-indigo-600 hover:text-indigo-500">
+                    🛵 بوابة المندوب
                 </Link>
             )}
             <Link to="/orders" className="text-sm font-medium text-gray-600 hover:text-indigo-500">

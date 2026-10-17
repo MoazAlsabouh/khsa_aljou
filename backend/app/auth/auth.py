@@ -44,7 +44,7 @@ def requires_auth(allowed_roles=None):
                if not all([user_id, user_role, session_id, token_session_version is not None]):
                    raise AuthError({'code': 'invalid_payload', 'description': 'Token payload is incomplete.'}, 401)
 
-               if user_role not in allowed_roles:
+               if allowed_roles and user_role not in allowed_roles:
                    raise AuthError({'code': 'unauthorized', 'description': 'Permission not found.'}, 403)
                
                session_obj = Session.query.get(session_id)

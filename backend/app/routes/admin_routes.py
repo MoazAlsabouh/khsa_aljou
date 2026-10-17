@@ -298,3 +298,58 @@ def add_restaurant_admin(payload, restaurant_id):
     db.session.commit()
 
     return jsonify({"success": True, "message": f"User {user_to_add.name} is now an admin for restaurant {restaurant.name}"}), 200
+
+# --- التقارير المالية والإحصائيات (Financial Reports) ---
+
+@admin_bp.route('/reports/financial', methods=['GET'])
+@requires_auth(allowed_roles=['manager', 'admin'])
+def get_financial_reports(payload):
+    """
+    جلب تقارير الأرباح العامة للمنصة.
+    يحسب إجمالي المبيعات، عمولة المنصة (بافتراض 10%)، وعدد الطلبات الناجحة.
+    """
+    from app.models import Order, Payment
+    from sqlalchemy import func
+    
+    # حساب إجمالي المبيعات للطلبات المكتملة
+    completed_orders_query = db.session.query(
+        func.count(Order.id).label('total_orders'),
+        func.sum(Order.total_price).label('total_revenue')
+    ).join(Payment).filter(
+        Payment.status == 'completed'
+    ).first()
+
+    total_orders = completed_orders_query.total_orders or 0
+    total_revenue = completed_orders_query.total_revenue or 0
+    
+    # بافتراض أن عمولة التطبيق هي 10% من إجمالي المبيعات
+    platform_commission_rate = 0.10
+    platform_profit = int(total_revenue * platform_commission_rate)
+
+    # جلب أفضل 5 مطاعم مبيعاً
+    top_restaurants = db.session.query(
+        Restaurant.name,
+        func.count(Order.id).label('orders_count'),
+        func.sum(Order.total_price).label('revenue')
+    ).join(Order).join(Payment).filter(
+        Payment.status == 'completed'
+    ).group_by(Restaurant.id).order_by(func.sum(Order.total_price).desc()).limit(5).all()
+
+    top_restaurants_data = [
+        {
+            "restaurant_name": r.name,
+            "orders_count": r.orders_count,
+            "revenue": r.revenue,
+            "platform_fee": int(r.revenue * platform_commission_rate)
+        } for r in top_restaurants
+    ]
+
+    return jsonify({
+        "summary": {
+            "total_orders": total_orders,
+            "total_revenue": total_revenue,
+            "platform_profit": platform_profit,
+            "commission_rate": "10%"
+        },
+        "top_restaurants": top_restaurants_data
+    }), 200

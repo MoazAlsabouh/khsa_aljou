@@ -281,3 +281,27 @@ def set_default_address(payload, address_id):
     except Exception as e:
         db.session.rollback()
         return jsonify({"success": False, "message": f"An error occurred: {str(e)}"}), 500
+
+@user_bp.route('/<int:user_id>/recommendations', methods=['GET'])
+@requires_auth()
+def get_user_recommendations(payload, user_id):
+    # Security check: Make sure user can only fetch their own recommendations unless admin
+    if payload['id'] != user_id and payload.get('role') not in ['admin', 'manager']:
+        return jsonify({'message': 'غير مصرح لك للوصول إلى هذه التوصيات'}), 403
+
+    lat = request.args.get('lat', type=float)
+    lon = request.args.get('lon', type=float)
+    
+    if not lat or not lon:
+        return jsonify({'message': 'الرجاء توفير إحداثيات الموقع الحالية (lat, lon) لجلب التوصيات'}), 400
+
+    from app.services.recommendation_service import RecommendationEngine
+    from app.utils.serializers import serialize_menu_item
+    
+    recs = RecommendationEngine.get_recommendations(user_id, lat, lon)
+    
+    return jsonify({
+        'order_again': [serialize_menu_item(item) for item in recs['order_again']],
+        'based_on_taste': [serialize_menu_item(item) for item in recs['based_on_taste']],
+        'trending_near_you': [serialize_menu_item(item) for item in recs['trending_near_you']]
+    }), 200
