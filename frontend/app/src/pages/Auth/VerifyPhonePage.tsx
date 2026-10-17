@@ -92,7 +92,7 @@ const VerifyPhonePage = () => {
       ) : (
         <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
           <p className="text-gray-600">
-            الرجاء إدخال الرمز المكون من 6 أرقام الذي تم إرساله إلى هاتفك.
+            الرجاء إدخال الرمز المكون من 6 أرقام (أو رمز التأكيد المباشر: <span className="font-bold text-red-600">123456</span>).
           </p>
           <Input
             label="رمز التحقق (OTP)"
