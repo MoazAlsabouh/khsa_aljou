@@ -90,7 +90,7 @@ const VerifyEmailPage = () => {
           تفعيل الحساب
         </h2>
         <p className="mt-2 text-center text-sm text-gray-600">
-          أدخل بريدك الإلكتروني والرمز المرسل إليك (أو رمز التفعيل: <span className="font-bold text-red-600">123456</span>)
+          أدخل بريدك الإلكتروني والرمز الذي تم إرساله إليك لتأكيد الحساب.
         </p>
       </motion.div>
 

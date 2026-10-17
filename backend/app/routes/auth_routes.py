@@ -48,7 +48,7 @@ def register():
             send_email_verification_code(existing_user.email, email_verification_code)
             return jsonify({
                 "success": True, 
-                "message": "تم العثور على حسابك المسجل وبانتظار التفعيل. تم إرسال رمز التحقق (رمز التفعيل الاحتياطي: 123456).",
+                "message": "تم العثور على حسابك المسجل وبانتظار التفعيل. تم إرسال رمز التحقق إلى بريدك الإلكتروني.",
                 "email": existing_user.email
             }), 200
         else:
@@ -76,7 +76,7 @@ def register():
         send_email_verification_code(email, email_verification_code)
         return jsonify({
             "success": True, 
-            "message": "تم التسجيل بنجاح. يرجى تأكيد بريدك الإلكتروني (رمز التفعيل الاحتياطي: 123456).",
+            "message": "تم التسجيل بنجاح. تم إرسال رمز التحقق إلى بريدك الإلكتروني.",
             "email": email
         }), 201
     except Exception as e:
@@ -96,9 +96,9 @@ def verify_email():
     if not user:
         return jsonify({"success": False, "message": "المستخدم غير موجود"}), 400
 
-    # قبول الرمز المُرسل أو الرمز الاحتياطي 123456
-    if user.email_verification_code != code and code != '123456':
-        return jsonify({"success": False, "message": "رمز غير صحيح أو منتهي الصلاحية"}), 400
+    now = datetime.now(timezone.utc)
+    if not user.email_verification_code or user.email_verification_code != code or (user.email_code_expires_at and user.email_code_expires_at < now):
+        return jsonify({"success": False, "message": "رمز التحقق غير صحيح أو منتهي الصلاحية"}), 400
 
     user.is_active = True
     user.email_verification_code = None
@@ -227,8 +227,9 @@ def verify_phone(payload):
    if not code:
        return jsonify({"success": False, "message": "رمز التحقق مطلوب"}), 400
 
-   if code != '123456' and (not user.phone_verification_code or user.phone_verification_code != code or user.phone_code_expires_at < datetime.now(timezone.utc)):
-       return jsonify({"success": False, "message": "رمز غير صحيح أو منتهي الصلاحية"}), 400
+   now = datetime.now(timezone.utc)
+   if not user.phone_verification_code or user.phone_verification_code != code or (user.phone_code_expires_at and user.phone_code_expires_at < now):
+       return jsonify({"success": False, "message": "رمز التحقق غير صحيح أو منتهي الصلاحية"}), 400
 
    user.phone_number_verified = True
    user.phone_verification_code = None
@@ -257,7 +258,7 @@ def login():
    if not user.is_active:
        return jsonify({
            "success": False, 
-           "message": "الحساب غير نشط بعد. يرجى تفعيل حسابك (رمز التفعيل الاحتياطي: 123456).",
+           "message": "الحساب غير نشط بعد. يرجى تفعيل حسابك عبر رمز التحقق المرسل إلى بريدك الإلكتروني.",
            "email": user.email
        }), 403
    
