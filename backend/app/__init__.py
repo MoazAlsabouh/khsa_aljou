@@ -35,6 +35,18 @@ def create_app():
     register_error_handlers(app) # تسجيل معالجات الأخطاء
     configure_oauth(app) # تهيئة مصادقة OAuth
 
+    @app.route('/')
+    def root():
+        return {
+            "status": "online",
+            "service": "Khsa Aljou Food Delivery Backend API",
+            "version": "2.0.0",
+            "target_market": "Syria",
+            "currency": "SYP (2026 redenomination)",
+            "api_base": "/api/v1",
+            "health": "healthy"
+        }, 200
+
     app.config['UPLOAD_FOLDER'] = os.path.join(app.root_path, 'static', 'uploads')
     # إنشاء مجلد الرفع إن لم يكن موجوداً
     try:
