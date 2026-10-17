@@ -19,6 +19,7 @@ depends_on = None
 
 
 def upgrade():
+    op.execute('CREATE EXTENSION IF NOT EXISTS postgis;')
     bind = op.get_bind()
     inspector = sa.inspect(bind)  # للتحقق من الفهارس الموجودة
 
