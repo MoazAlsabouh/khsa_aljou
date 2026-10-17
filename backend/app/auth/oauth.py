@@ -30,8 +30,7 @@ def configure_oauth(app):
         access_token_url='https://github.com/login/oauth/access_token',
         authorize_url='https://github.com/login/oauth/authorize',
         api_base_url='https://api.github.com/',
-        client_kwargs={'scope': 'user:email'},
-        redirect_uri= f"{BACKEND_URL}/api/v1/auth/authorize/github"
+        client_kwargs={'scope': 'user:email'}
     )
 
     # تكوين Facebook OAuth
@@ -42,6 +41,5 @@ def configure_oauth(app):
         access_token_url='https://graph.facebook.com/oauth/access_token',
         authorize_url='https://www.facebook.com/dialog/oauth',
         api_base_url='https://graph.facebook.com/',
-        client_kwargs={'scope': 'email'},
-        redirect_uri= f"{BACKEND_URL}/api/v1/auth/authorize/facebook"
+        client_kwargs={'scope': 'email'}
     )

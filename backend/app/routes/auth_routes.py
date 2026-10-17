@@ -15,7 +15,7 @@ import os
 from dotenv import load_dotenv
 
 load_dotenv()
-FRONTEND_URL = os.getenv('FRONTEND_URL', 'http://localhost:3000')
+FRONTEND_URL = os.getenv('FRONTEND_URL', 'https://moazalsabouh.github.io/khsa_aljou')
 
 auth_api_bp = Blueprint('auth_api', __name__)
 
@@ -325,85 +325,93 @@ def logout_all_sessions(payload):
 # --- مسارات OAuth ---
 @auth_api_bp.route('/oauth/login/<name>')
 def login_oauth(name):
-   redirect_uri = url_for('api.auth_api.authorize', name=name, _external=True)
-   return oauth.create_client(name).authorize_redirect(redirect_uri)
+    backend_url = os.getenv('BACKEND_URL')
+    if backend_url:
+        redirect_uri = f"{backend_url.rstrip('/')}/api/v1/auth/oauth/authorize/{name}"
+    else:
+        redirect_uri = url_for('api.auth_api.authorize', name=name, _external=True)
+        # فرض HTTPS في بيئة الإنتاج أو عندما يكون الطلب مشفراً عبر Proxy
+        if (request.headers.get('X-Forwarded-Proto') == 'https' or not current_app.debug) and redirect_uri.startswith('http://'):
+            redirect_uri = redirect_uri.replace('http://', 'https://', 1)
+            
+    return oauth.create_client(name).authorize_redirect(redirect_uri)
 
 @auth_api_bp.route('/oauth/authorize/<name>')
 def authorize(name):
-   try:
-       client = oauth.create_client(name)
-       if not client:
-           return redirect(f"{FRONTEND_URL}/auth/callback?error=OAuth client not configured")
+    try:
+        client = oauth.create_client(name)
+        if not client:
+            return redirect(f"{FRONTEND_URL.rstrip('/')}/oauth/callback?error=OAuth client not configured")
 
-       token = client.authorize_access_token()
-       user_info = {}
-       email = None
-       user_name = None
-       profile_pic = None
-       
-       if name == 'google':
-           user_info = oauth.google.userinfo()
-           email = user_info.get('email')
-           user_name = user_info.get('name')
-           profile_pic = user_info.get('picture')
-       elif name == 'github':
-           resp = client.get('user')
-           resp.raise_for_status()
-           user_info = resp.json()
-           email = user_info.get('email')
-           user_name = user_info.get('name') or user_info.get('login')
-           profile_pic = user_info.get('avatar_url')
-       elif name == 'facebook':
-           resp = client.get('me?fields=id,name,email')
-           resp.raise_for_status()
-           user_info = resp.json()
-           email = user_info.get('email')
-           user_name = user_info.get('name')
-           pic_resp = client.get(f"{user_info['id']}/picture?type=large&redirect=false")
-           pic_resp.raise_for_status()
-           profile_pic = pic_resp.json().get('data', {}).get('url')
+        token = client.authorize_access_token()
+        user_info = {}
+        email = None
+        user_name = None
+        profile_pic = None
+        
+        if name == 'google':
+            user_info = oauth.google.userinfo()
+            email = user_info.get('email')
+            user_name = user_info.get('name')
+            profile_pic = user_info.get('picture')
+        elif name == 'github':
+            resp = client.get('user')
+            resp.raise_for_status()
+            user_info = resp.json()
+            email = user_info.get('email')
+            user_name = user_info.get('name') or user_info.get('login')
+            profile_pic = user_info.get('avatar_url')
+        elif name == 'facebook':
+            resp = client.get('me?fields=id,name,email')
+            resp.raise_for_status()
+            user_info = resp.json()
+            email = user_info.get('email')
+            user_name = user_info.get('name')
+            pic_resp = client.get(f"{user_info['id']}/picture?type=large&redirect=false")
+            pic_resp.raise_for_status()
+            profile_pic = pic_resp.json().get('data', {}).get('url')
 
-       if not email:
-           return redirect(f"{FRONTEND_URL}/auth/callback?error=لم يتم الحصول على البريد الإلكتروني")
-       
-       user = User.query.filter_by(email=email).first()
+        if not email:
+            return redirect(f"{FRONTEND_URL.rstrip('/')}/oauth/callback?error=لم يتم الحصول على البريد الإلكتروني")
+        
+        user = User.query.filter_by(email=email).first()
 
-       if user:
-           if not user.oauth_provider or user.oauth_provider != name:
-               return redirect(f"{FRONTEND_URL}/auth/callback?error=هذا البريد مسجل بطريقة أخرى")
-       else:
-           user = User(
-               email=email,
-               phone_number=generate_unique_oauth_phone_placeholder(),
-               name=user_name,
-               role='customer',
-               is_active=True,
-               phone_number_verified=False,
-               password_hash=None,
-               oauth_provider=name,
-               profile_image_url=profile_pic if profile_pic else 'https://placehold.co/400x400/EFEFEF/AAAAAA?text=User'
-           )
-           db.session.add(user)
-           db.session.commit()
-       
-       session_id = uuid.uuid4()
-       refresh_token_value, refresh_token_jti = generate_refresh_token(session_id)
-       
-       new_session = Session(
-           id=str(session_id),
-           user_id=user.id,
-           refresh_token_jti=refresh_token_jti,
-           expires_at=datetime.now(timezone.utc) + timedelta(days=30),
-           user_agent=request.headers.get('User-Agent'),
-           ip_address=request.remote_addr
-       )
-       db.session.add(new_session)
-       db.session.commit()
+        if user:
+            if not user.oauth_provider or user.oauth_provider != name:
+                return redirect(f"{FRONTEND_URL.rstrip('/')}/oauth/callback?error=هذا البريد مسجل بطريقة أخرى")
+        else:
+            user = User(
+                email=email,
+                phone_number=generate_unique_oauth_phone_placeholder(),
+                name=user_name,
+                role='customer',
+                is_active=True,
+                phone_number_verified=False,
+                password_hash=None,
+                oauth_provider=name,
+                profile_image_url=profile_pic if profile_pic else 'https://placehold.co/400x400/EFEFEF/AAAAAA?text=User'
+            )
+            db.session.add(user)
+            db.session.commit()
+        
+        session_id = uuid.uuid4()
+        refresh_token_value, refresh_token_jti = generate_refresh_token(session_id)
+        
+        new_session = Session(
+            id=str(session_id),
+            user_id=user.id,
+            refresh_token_jti=refresh_token_jti,
+            expires_at=datetime.now(timezone.utc) + timedelta(days=30),
+            user_agent=request.headers.get('User-Agent'),
+            ip_address=request.remote_addr
+        )
+        db.session.add(new_session)
+        db.session.commit()
 
-       access_token = generate_token(user, new_session.id, new_session.session_version)
-       
-       return redirect(f"{FRONTEND_URL}/auth/callback?token={access_token}&refresh_token={refresh_token_value}")
+        access_token = generate_token(user, new_session.id, new_session.session_version)
+        
+        return redirect(f"{FRONTEND_URL.rstrip('/')}/oauth/callback?token={access_token}&refresh_token={refresh_token_value}")
 
-   except Exception as e:
-       db.session.rollback()
-       return redirect(f"{FRONTEND_URL}/auth/callback?error=فشل تسجيل الدخول عبر OAuth: {str(e)}")
+    except Exception as e:
+        db.session.rollback()
+        return redirect(f"{FRONTEND_URL.rstrip('/')}/oauth/callback?error=فشل تسجيل الدخول عبر OAuth: {str(e)}")

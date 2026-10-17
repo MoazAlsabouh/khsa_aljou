@@ -17,6 +17,10 @@ def create_app():
     app.config.from_object('app.config.Config')
     app.secret_key = app.config.get("SECRET_KEY") # استخدام SECRET_KEY من Config
 
+    # دعم Reverse Proxy (Render / Cloudflare) للحفاظ على بروتوكول HTTPS
+    from werkzeug.middleware.proxy_fix import ProxyFix
+    app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1)
+
     # --- جديد: تهيئة Cloudinary ---
     cloudinary.config(
         cloud_name = app.config['CLOUDINARY_CLOUD_NAME'],
