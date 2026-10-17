@@ -39,7 +39,15 @@ axiosClient.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
-    if (error.response.status === 401 && !originalRequest._retry) {
+    
+    // تجنب محاولة تجديد التوكن في مسارات تسجيل الدخول أو التسجيل
+    const isAuthEndpoint = originalRequest?.url?.includes('/auth/login') || 
+                           originalRequest?.url?.includes('/auth/register') ||
+                           originalRequest?.url?.includes('/auth/refresh');
+
+    const refreshToken = useAuthStore.getState().refreshToken;
+
+    if (error.response?.status === 401 && !originalRequest?._retry && !isAuthEndpoint && refreshToken) {
       if (isRefreshing) {
         return new Promise(function(resolve, reject) {
           failedQueue.push({ resolve, reject });
@@ -54,11 +62,7 @@ axiosClient.interceptors.response.use(
       originalRequest._retry = true;
       isRefreshing = true;
 
-      const { refreshToken, setTokens, logout } = useAuthStore.getState();
-      if (!refreshToken) {
-        logout();
-        return Promise.reject(error);
-      }
+      const { setTokens, logout } = useAuthStore.getState();
 
       try {
         const { data } = await axios.post(`${API_BASE_URL}/auth/refresh`, {
