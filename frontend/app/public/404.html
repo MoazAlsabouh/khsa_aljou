@@ -8,14 +8,14 @@
       const path = location.pathname + location.search + location.hash;
       
       // يخزنه في sessionStorage ليقرأه تطبيق React
-      sessionStorage.setItem('redirectPath', path);
+      sessionStorage.setItem('redirectPath', path.replace('/khsa_aljou', '') || '/');
       
       // يعيد التوجيه إلى الصفحة الرئيسية للتطبيق
-      location.replace(location.origin);
+      location.replace('/khsa_aljou/');
     </script>
   </head>
   <body>
-    If you are not redirected automatically, follow this <a href="/">link to the homepage</a>.
+    If you are not redirected automatically, follow this <a href="/khsa_aljou/">link to the homepage</a>.
   </body>
 </html>
 <!-- <!DOCTYPE html>

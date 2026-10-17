@@ -29,7 +29,7 @@ function App() {
         reverseOrder={false}
       />
       <ConfirmModal />
-      <BrowserRouter>
+      <BrowserRouter basename={import.meta.env.BASE_URL}>
         <RedirectHandler />
         <AppRoutes />
       </BrowserRouter>
