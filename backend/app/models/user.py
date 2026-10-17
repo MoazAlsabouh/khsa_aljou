@@ -1,14 +1,13 @@
 from app.extensions import db
 from werkzeug.security import generate_password_hash, check_password_hash
 from sqlalchemy.sql import func
-from sqlalchemy_utils import EmailType
 
 
 class User(db.Model):
    __tablename__ = 'users'
    id = db.Column(db.Integer, primary_key=True)
    phone_number = db.Column(db.String(20), unique=True, nullable=False)
-   email = db.Column(EmailType, unique=True, nullable=False)
+   email = db.Column(db.String(255), unique=True, nullable=False)
    name = db.Column(db.String(100), nullable=False)
    profile_image_url = db.Column(db.String(255), nullable=True)
    password_hash = db.Column(db.Text, nullable=True)
