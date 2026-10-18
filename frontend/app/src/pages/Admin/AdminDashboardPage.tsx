@@ -52,15 +52,15 @@ const AdminDashboardPage = () => {
         <div className="mb-10">
             {/* بطاقات الإحصائيات المالية */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                <div className="bg-white p-6 rounded-xl shadow-sm border-l-4 border-indigo-500">
+                <div className="bg-white p-6 rounded-xl shadow-sm border-r-4 border-indigo-500">
                     <p className="text-sm text-gray-500 mb-1">إجمالي المبيعات (GMV)</p>
                     <p className="text-3xl font-bold text-gray-800">{report.summary.total_revenue.toLocaleString('ar-SY')} <span className="text-sm font-normal">ل.س</span></p>
                 </div>
-                <div className="bg-white p-6 rounded-xl shadow-sm border-l-4 border-green-500">
+                <div className="bg-white p-6 rounded-xl shadow-sm border-r-4 border-green-500">
                     <p className="text-sm text-gray-500 mb-1">أرباح المنصة ({report.summary.commission_rate})</p>
                     <p className="text-3xl font-bold text-green-600">{report.summary.platform_profit.toLocaleString('ar-SY')} <span className="text-sm font-normal">ل.س</span></p>
                 </div>
-                <div className="bg-white p-6 rounded-xl shadow-sm border-l-4 border-blue-500">
+                <div className="bg-white p-6 rounded-xl shadow-sm border-r-4 border-blue-500">
                     <p className="text-sm text-gray-500 mb-1">إجمالي الطلبات المكتملة</p>
                     <p className="text-3xl font-bold text-blue-600">{report.summary.total_orders.toLocaleString('ar-SY')}</p>
                 </div>
