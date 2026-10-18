@@ -19,11 +19,104 @@ def _is_true(val: str | None, default: bool = False) -> bool:
     return str(val).strip().lower() in ("true", "1", "yes", "on")
 
 
-def _send_email_worker(to_email: str, subject: str, body: str):
+def build_verification_email_html(code: str) -> str:
+    """
+    قالب بريد إلكتروني فائق الجمال بتصميم عصري وهوية منصة خسى الجوع.
+    متوافق 100% مع كافة برامج وتطبيقات البريد (Gmail, Apple Mail, Outlook).
+    """
+    return f"""<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>رمز التحقق - خسى الجوع</title>
+</head>
+<body style="margin: 0; padding: 0; background-color: #f8fafc; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; direction: rtl; text-align: right;">
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color: #f8fafc; padding: 30px 10px;">
+    <tr>
+      <td align="center">
+        <!-- الحاوية المركزية -->
+        <table role="presentation" width="100%" style="max-width: 540px; background-color: #ffffff; border-radius: 24px; overflow: hidden; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01); border: 1px solid #e2e8f0;">
+          
+          <!-- الترويسة الرئيسية مع تدرج أحمر وبرتقالي دافئ وشعار المنصة -->
+          <tr>
+            <td style="background: linear-gradient(135deg, #dc2626 0%, #ea580c 100%); padding: 34px 24px; text-align: center;">
+              <div style="display: inline-block; width: 54px; height: 54px; line-height: 54px; background-color: #ffffff; color: #dc2626; font-size: 28px; font-weight: 900; border-radius: 16px; margin-bottom: 12px; box-shadow: 0 4px 14px rgba(0,0,0,0.18);">
+                خ
+              </div>
+              <h1 style="color: #ffffff; margin: 0; font-size: 26px; font-weight: 900; letter-spacing: -0.5px;">خسى الجوع</h1>
+              <p style="color: rgba(255, 255, 255, 0.92); margin: 6px 0 0 0; font-size: 13px; font-weight: 500;">
+                أسرع توصيل للمطاعم والوجبات في سوريا
+              </p>
+            </td>
+          </tr>
+
+          <!-- جسم الرسالة -->
+          <tr>
+            <td style="padding: 34px 28px 24px 28px;">
+              <h2 style="color: #0f172a; margin: 0 0 12px 0; font-size: 20px; font-weight: 800;">
+                مرحباً بك! 👋
+              </h2>
+              <p style="color: #475569; margin: 0 0 22px 0; font-size: 15px; line-height: 1.6;">
+                شكراً لتسجيلك في منصة <strong>خسى الجوع</strong>. لتفعيل حسابك ومتابعة طلباتك وتتبع موقع الوجبات على الخريطة لحظة بلحظة، يرجى إدخال رمز التحقق التالي:
+              </p>
+
+              <!-- بطاقة رمز التحقق المميزة -->
+              <table role="presentation" width="100%" style="margin: 24px 0; background-color: #fff1f2; border: 2px dashed #f43f5e; border-radius: 16px;">
+                <tr>
+                  <td style="padding: 22px 16px; text-align: center;">
+                    <div style="font-size: 12px; font-weight: 700; color: #e11d48; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px;">
+                      رمز التأكيد (OTP)
+                    </div>
+                    <div style="font-family: 'Courier New', Courier, monospace, sans-serif; font-size: 36px; font-weight: 900; letter-spacing: 8px; color: #be123c; direction: ltr; display: inline-block;">
+                      {code}
+                    </div>
+                    <div style="margin-top: 10px; font-size: 12px; color: #9f1239; font-weight: 500;">
+                      ⏳ هذا الرمز صالح لمدة <strong>15 دقيقة</strong>
+                    </div>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- صندوق تنبيه أمان -->
+              <div style="background-color: #f8fafc; border-radius: 12px; padding: 14px 16px; border-right: 4px solid #f59e0b; margin-top: 20px;">
+                <p style="margin: 0; font-size: 13px; color: #64748b; line-height: 1.5;">
+                  🔒 <strong>تنبيه أمان:</strong> هذا الرمز خاص بك وحدك. فريق خسى الجوع لن يطلب منك هذا الرمز أبداً تحت أي ظرف.
+                </p>
+              </div>
+
+              <p style="color: #94a3b8; font-size: 12px; line-height: 1.5; margin: 24px 0 0 0;">
+                إذا لم تكن قد أنشأت هذا الحساب، يمكنك ببساطة تجاهل هذه الرسالة ولن يتم تفعيل أي شيء.
+              </p>
+            </td>
+          </tr>
+
+          <!-- تذييل الصفحة -->
+          <tr>
+            <td style="background-color: #f8fafc; padding: 20px 24px; text-align: center; border-top: 1px solid #f1f5f9;">
+              <p style="margin: 0; font-size: 12px; color: #94a3b8; font-weight: 500;">
+                © 2026 <strong>منصة خسى الجوع</strong> - جميع الحقوق محفوظة
+              </p>
+              <p style="margin: 4px 0 0 0; font-size: 11px; color: #cbd5e1;">
+                سوريا | تتبع مباشر للطلبات عبر GPS ودعم العملة السورية الجديدة
+              </p>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+"""
+
+
+def _send_email_worker(to_email: str, subject: str, body: str, html: str | None = None):
     sender_email = _clean(os.getenv("MAIL_SENDER_EMAIL")) or "onboarding@resend.dev"
     sender_name = _clean(os.getenv("MAIL_SENDER_NAME")) or "خسى الجوع"
 
-    # API Keys & Webhook URLs for HTTPS email delivery (Bypasses Render SMTP port blocks)
+    # API Keys & Webhook URLs for HTTPS email delivery
     google_script_url = _clean(os.getenv("GOOGLE_SCRIPT_MAIL_URL"))
     resend_api_key = _clean(os.getenv("RESEND_API_KEY"))
     brevo_api_key = _clean(os.getenv("BREVO_API_KEY"))
@@ -35,13 +128,19 @@ def _send_email_worker(to_email: str, subject: str, body: str):
     print(f"📧 [Body]:\n{body.strip()}")
     print(f"========================================================\n")
 
-    # 0. إرسال عبر Google Apps Script Web App (من حساب الجيميل الشخصي مباشرة عبر HTTPS بورت 443)
+    # 0. إرسال عبر Google Apps Script Web App (يدعم HTML و النص العادي)
     if google_script_url:
         try:
             print("🚀 Sending email via Google Apps Script HTTPS Web App (Port 443)...")
             res = requests.post(
                 google_script_url,
-                json={"to": to_email, "subject": subject, "body": body},
+                json={
+                    "to": to_email,
+                    "subject": subject,
+                    "body": body,
+                    "html": html or body,
+                    "htmlBody": html or body
+                },
                 timeout=12,
                 allow_redirects=True
             )
@@ -53,7 +152,7 @@ def _send_email_worker(to_email: str, subject: str, body: str):
         except Exception as e:
             print(f"⚠️ Google Script failed: {e}")
 
-    # 1. إرسال عبر Resend HTTPS API (منفذ 443 مفتوح دائماً)
+    # 1. إرسال عبر Resend HTTPS API
     if resend_api_key:
         try:
             print("🚀 Sending email via Resend HTTPS API (Port 443)...")
@@ -68,7 +167,8 @@ def _send_email_worker(to_email: str, subject: str, body: str):
                     "from": from_addr,
                     "to": [to_email],
                     "subject": subject,
-                    "text": body
+                    "text": body,
+                    "html": html or body
                 },
                 timeout=10
             )
@@ -80,7 +180,7 @@ def _send_email_worker(to_email: str, subject: str, body: str):
         except Exception as e:
             print(f"⚠️ Resend API failed: {e}")
 
-    # 2. إرسال عبر Brevo HTTPS API (منفذ 443 مفتوح دائماً)
+    # 2. إرسال عبر Brevo HTTPS API
     if brevo_api_key:
         try:
             print("🚀 Sending email via Brevo HTTPS API (Port 443)...")
@@ -94,7 +194,8 @@ def _send_email_worker(to_email: str, subject: str, body: str):
                     "sender": {"name": sender_name, "email": sender_email},
                     "to": [{"email": to_email}],
                     "subject": subject,
-                    "textContent": body
+                    "textContent": body,
+                    "htmlContent": html or body
                 },
                 timeout=10
             )
@@ -106,10 +207,13 @@ def _send_email_worker(to_email: str, subject: str, body: str):
         except Exception as e:
             print(f"⚠️ Brevo API failed: {e}")
 
-    # 3. إرسال عبر SendGrid HTTPS API (منفذ 443 مفتوح دائماً)
+    # 3. إرسال عبر SendGrid HTTPS API
     if sendgrid_api_key:
         try:
             print("🚀 Sending email via SendGrid HTTPS API (Port 443)...")
+            content = [{"type": "text/plain", "value": body}]
+            if html:
+                content.append({"type": "text/html", "value": html})
             res = requests.post(
                 "https://api.sendgrid.com/v3/mail/send",
                 headers={
@@ -120,7 +224,7 @@ def _send_email_worker(to_email: str, subject: str, body: str):
                     "personalizations": [{"to": [{"email": to_email}]}],
                     "from": {"email": sender_email, "name": sender_name},
                     "subject": subject,
-                    "content": [{"type": "text/plain", "value": body}]
+                    "content": content
                 },
                 timeout=10
             )
@@ -150,11 +254,13 @@ def _send_email_worker(to_email: str, subject: str, body: str):
         return
 
     from_header = f"{sender_name} <{sender_email}>" if sender_name else sender_email
-    msg = MIMEMultipart()
+    msg = MIMEMultipart('alternative')
     msg['From'] = from_header
     msg['To'] = to_email
     msg['Subject'] = subject
     msg.attach(MIMEText(body, 'plain', 'utf-8'))
+    if html:
+        msg.attach(MIMEText(html, 'html', 'utf-8'))
 
     try:
         print(f"🔄 Connecting to SMTP {smtp_server}:{smtp_port} (SSL: {use_ssl}, TLS: {use_tls})...")
@@ -175,25 +281,30 @@ def _send_email_worker(to_email: str, subject: str, body: str):
         print("💡 Note: Render Free Tier blocks outbound SMTP ports (25, 465, 587). To send real emails from Render, add RESEND_API_KEY or BREVO_API_KEY in Render Environment Variables.")
 
 
-def send_email(to_email: str, subject: str, body: str) -> bool:
+def send_email(to_email: str, subject: str, body: str, html: str | None = None) -> bool:
     """
     Sends email asynchronously in a background thread to prevent blocking
     the Gunicorn worker processes.
     """
-    thread = threading.Thread(target=_send_email_worker, args=(to_email, subject, body), daemon=True)
+    thread = threading.Thread(target=_send_email_worker, args=(to_email, subject, body, html), daemon=True)
     thread.start()
     return True
 
 
 def send_email_verification_code(email: str, code: str) -> bool:
     """
-    Sends a verification code email for account/email confirmation.
+    Sends a verification code email for account/email confirmation with rich HTML and plain text fallback.
     """
     subject = "رمز التحقق من بريدك الإلكتروني - خسى الجوع"
+    
+    # نص بسيط ومنسق لعرض النص الصافي بدقة
     body = f"""مرحباً بك في منصة خسى الجوع،
 
-رمز التحقق الخاص بك هو: {code}
+رمز التحقق الخاص بك هو:
+{code}
 
-يرجى إدخال هذا الرمز لتفعيل حسابك ومتابعة طلباتك.
+يرجى إدخال هذا الرمز في الموقع لتفعيل حسابك ومتابعة طلباتك.
+(صلاحية هذا الرمز 15 دقيقة).
 """
-    return send_email(email, subject, body)
+    html = build_verification_email_html(code)
+    return send_email(email, subject, body, html=html)
