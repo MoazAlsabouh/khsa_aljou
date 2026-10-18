@@ -23,7 +23,8 @@ def _send_email_worker(to_email: str, subject: str, body: str):
     sender_email = _clean(os.getenv("MAIL_SENDER_EMAIL")) or "onboarding@resend.dev"
     sender_name = _clean(os.getenv("MAIL_SENDER_NAME")) or "خسى الجوع"
 
-    # API Keys for HTTPS email delivery (Completely bypasses Render SMTP port blocks)
+    # API Keys & Webhook URLs for HTTPS email delivery (Bypasses Render SMTP port blocks)
+    google_script_url = _clean(os.getenv("GOOGLE_SCRIPT_MAIL_URL"))
     resend_api_key = _clean(os.getenv("RESEND_API_KEY"))
     brevo_api_key = _clean(os.getenv("BREVO_API_KEY"))
     sendgrid_api_key = _clean(os.getenv("SENDGRID_API_KEY"))
@@ -33,6 +34,24 @@ def _send_email_worker(to_email: str, subject: str, body: str):
     print(f"📧 [Subject]: {subject}")
     print(f"📧 [Body]:\n{body.strip()}")
     print(f"========================================================\n")
+
+    # 0. إرسال عبر Google Apps Script Web App (من حساب الجيميل الشخصي مباشرة عبر HTTPS بورت 443)
+    if google_script_url:
+        try:
+            print("🚀 Sending email via Google Apps Script HTTPS Web App (Port 443)...")
+            res = requests.post(
+                google_script_url,
+                json={"to": to_email, "subject": subject, "body": body},
+                timeout=12,
+                allow_redirects=True
+            )
+            if res.status_code in (200, 201, 302) or res.ok:
+                print(f"✅ Email delivered to {to_email} successfully via Google Apps Script.")
+                return
+            else:
+                print(f"⚠️ Google Script returned status {res.status_code}: {res.text}")
+        except Exception as e:
+            print(f"⚠️ Google Script failed: {e}")
 
     # 1. إرسال عبر Resend HTTPS API (منفذ 443 مفتوح دائماً)
     if resend_api_key:
