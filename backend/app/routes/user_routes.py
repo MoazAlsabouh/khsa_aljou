@@ -26,10 +26,6 @@ def get_user_profile(payload):
     user = User.query.get(payload['id'])
     if not user:
         return jsonify({"success": False, "message": "User not found"}), 404
-    owner_emails = ['moaz005moaz@gmail.com', 'moaznsm@gmail.com', 'moazsabouh963@gmail.com']
-    if (user.email in owner_emails or os.getenv('ADMIN_EMAIL') == user.email) and user.role != 'admin':
-        user.role = 'admin'
-        db.session.commit()
     return jsonify({"success": True, "user": serialize_user(user)}), 200
 
 @user_bp.route('/me', methods=['PUT'])

@@ -48,10 +48,6 @@ def requires_auth(allowed_roles=None):
                # جلب المستخدم الحالي وتحديث دوره في الوقت الفعلي
                user_obj = User.query.get(user_id)
                if user_obj:
-                   owner_emails = ['moaz005moaz@gmail.com', 'moaznsm@gmail.com', 'moazsabouh963@gmail.com']
-                   if (user_obj.email in owner_emails or os.getenv('ADMIN_EMAIL') == user_obj.email) and user_obj.role != 'admin':
-                       user_obj.role = 'admin'
-                       db.session.commit()
                    user_role = user_obj.role
                    payload['role'] = user_role
 

@@ -16,11 +16,20 @@ admin_bp = Blueprint('admin_bp', __name__)
 @admin_bp.route('/users', methods=['GET'])
 @requires_auth(allowed_roles=['manager', 'admin'])
 def get_all_users(payload):
-    """جلب قائمة بجميع المستخدمين مع ترقيم الصفحات."""
+    """جلب قائمة بجميع المستخدمين مع ترقيم الصفحات والبحث والفلترة."""
     page = request.args.get('page', 1, type=int)
     per_page = request.args.get('per_page', 10, type=int)
+    search = request.args.get('search')
+    role_filter = request.args.get('role')
     
-    pagination = User.query.order_by(User.id.asc()).paginate(page=page, per_page=per_page, error_out=False)
+    query = User.query
+    if search:
+        search_term = f"%{search.strip()}%"
+        query = query.filter(or_(User.name.ilike(search_term), User.email.ilike(search_term), User.phone_number.ilike(search_term)))
+    if role_filter:
+        query = query.filter(User.role == role_filter.strip())
+        
+    pagination = query.order_by(User.id.asc()).paginate(page=page, per_page=per_page, error_out=False)
     users = pagination.items
     
     return jsonify({
@@ -53,25 +62,39 @@ def search_users(payload):
 @requires_auth(allowed_roles=['manager', 'admin'])
 def change_user_role(payload, user_id):
     """تغيير دور مستخدم معين."""
-    acting_user_role = payload['role']
-    data = request.get_json()
+    acting_user = User.query.get(payload['id'])
+    acting_user_role = acting_user.role if acting_user else payload.get('role', 'customer')
+    data = request.get_json() or {}
     new_role = data.get('new_role')
 
-    if not new_role:
-        return jsonify({"success": False, "message": "New role is required"}), 400
+    valid_roles = ['customer', 'courier', 'restaurant_manager', 'restaurant_admin', 'manager', 'admin']
+    if not new_role or new_role not in valid_roles:
+        return jsonify({"success": False, "message": f"الدور غير صالح. الأدوار المتاحة: {', '.join(valid_roles)}"}), 400
 
     user_to_change = User.query.get(user_id)
     if not user_to_change:
-        return jsonify({"success": False, "message": "User not found"}), 404
+        return jsonify({"success": False, "message": "المستخدم غير موجود"}), 404
 
     # قواعد تغيير الأدوار
     if acting_user_role == 'manager':
         if new_role in ['admin', 'manager'] or user_to_change.role in ['admin', 'manager']:
-            return jsonify({"success": False, "message": "Managers cannot assign or modify admin/manager roles"}), 403
+            return jsonify({"success": False, "message": "لا يملك المدير صلاحية تعيين أو تعديل دور أدمن أو مدير"}), 403
     
     user_to_change.role = new_role
+
+    # في حال ترقية المستخدم إلى مندوب، نتأكد من وجود بروفايل مندوب له
+    if new_role == 'courier':
+        from app.models import Courier
+        if not user_to_change.courier_profile:
+            courier = Courier(user_id=user_to_change.id, status='available', vehicle_type='motorcycle')
+            db.session.add(courier)
+
     db.session.commit()
-    return jsonify({"success": True, "message": f"User {user_id} role changed to {new_role}"}), 200
+    return jsonify({
+        "success": True, 
+        "message": f"تم تغيير دور المستخدم بنجاح إلى {new_role}",
+        "user": serialize_user(user_to_change)
+    }), 200
 
 @admin_bp.route('/users/<int:user_id>/ban', methods=['POST'])
 @requires_auth(allowed_roles=['manager', 'admin'])

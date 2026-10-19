@@ -268,11 +268,6 @@ def login():
    if user.oauth_provider:
        return jsonify({"success": False, "message": f"يرجى تسجيل الدخول باستخدام {user.oauth_provider}"}), 403
 
-   owner_emails = ['moaz005moaz@gmail.com', 'moaznsm@gmail.com', 'moazsabouh963@gmail.com']
-   if (user.email in owner_emails or os.getenv('ADMIN_EMAIL') == user.email) and user.role != 'admin':
-       user.role = 'admin'
-       db.session.commit()
-
    session_id = uuid.uuid4()
    refresh_token_value, refresh_token_jti = generate_refresh_token(session_id)
    

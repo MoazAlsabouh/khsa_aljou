@@ -367,6 +367,40 @@ class KhsaAljouInternalTestSuite(unittest.TestCase):
             int(rep_data['summary']['total_revenue'] * 0.10),
         )
 
+    def test_07_admin_role_change_and_persistence(self):
+        """7. اختبار تغيير دور المستخدم من لوحة الإدارة واستقراره دون ارتداد."""
+        # 1. تغيير دور العميل إلى مندوب courier
+        role_res = self.client.put(
+            f'/api/v1/admin/users/{self.customer.id}/role',
+            headers=self._headers(self.admin_token),
+            json={'new_role': 'courier'}
+        )
+        self.assertEqual(role_res.status_code, 200)
+        self.assertEqual(role_res.get_json()['user']['role'], 'courier')
+
+        # 2. التأكد من حفظ الدور في قاعدة البيانات
+        customer_reloaded = User.query.get(self.customer.id)
+        self.assertEqual(customer_reloaded.role, 'courier')
+        self.assertIsNotNone(customer_reloaded.courier_profile)
+
+        # 3. التأكد من أن جلب قائمة المستخدمين يعيد الدور الجديد
+        users_res = self.client.get(
+            f'/api/v1/admin/users?search={self.customer.email}',
+            headers=self._headers(self.admin_token)
+        )
+        self.assertEqual(users_res.status_code, 200)
+        matched_user = next((u for u in users_res.get_json()['users'] if u['id'] == self.customer.id), None)
+        self.assertIsNotNone(matched_user)
+        self.assertEqual(matched_user['role'], 'courier')
+
+        # 4. محاولة إرسال دور غير صالح
+        invalid_res = self.client.put(
+            f'/api/v1/admin/users/{self.customer.id}/role',
+            headers=self._headers(self.admin_token),
+            json={'new_role': 'superman'}
+        )
+        self.assertEqual(invalid_res.status_code, 400)
+
 
 if __name__ == '__main__':
     print("=" * 70)
